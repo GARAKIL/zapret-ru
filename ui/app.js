@@ -4,10 +4,10 @@
   const $ = (id) => document.getElementById(id);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
-  const MODE_LABELS = { list: "По списку", global: "Всё" };
+  const MODE_LABELS = { list: "По списку", global: "Все программы" };
   const MODE_NOTES = {
-    list: "Системный обход доменов из списка — работает во всех браузерах и приложениях.",
-    global: "Системный обход TCP 80/443 и UDP 443 — для всех программ, кроме list-exclude.txt.",
+    list: "Движок разрезает только домены из списка. Остальной трафик идёт напрямую.",
+    global: "Движок разрезает TCP 80/443 для всех программ, кроме списка исключений.",
   };
   const LIST_META = {
     general: { title: "Список обхода", filename: "list-general.txt" },
@@ -29,6 +29,8 @@
     status: null,
     usage: null,
     autostart: false,
+    blockQuicBusy: false,
+    maximized: false,
     activeTab: "home",
     operation: null,
     autotuneStep: "",
@@ -138,6 +140,16 @@
 
   function delay(ms) {
     return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function formatNumber(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "—";
+    try {
+      return new Intl.NumberFormat("ru-RU").format(number);
+    } catch {
+      return String(number);
+    }
   }
 
   function plural(count, one, few, many) {
@@ -458,50 +470,64 @@
     const foot = $("hero-foot");
 
     if (operation === "start") {
-      eyebrow.textContent = "ПОДКЛЮЧЕНИЕ";
-      title.textContent = "Запускаем WinDivert";
-      subtitle.textContent = "Проверяем параметры стратегии и поднимаем фильтры…";
+      eyebrow.textContent = "ВКЛЮЧЕНИЕ";
+      title.textContent = "Поднимаем защиту";
+      subtitle.textContent = "Открываем WinDivert и применяем выбранный профиль…";
     } else if (operation === "stop") {
       eyebrow.textContent = "ОСТАНОВКА";
-      title.textContent = "Завершаем процесс";
-      subtitle.textContent = "winws.exe аккуратно останавливается…";
+      title.textContent = "Снимаем фильтры";
+      subtitle.textContent = "Движок аккуратно закрывает WinDivert…";
     } else if (operation === "restart") {
       eyebrow.textContent = "ПЕРЕЗАПУСК";
       title.textContent = "Применяем настройки";
-      subtitle.textContent = "winws.exe перезапускается с новой стратегией…";
+      subtitle.textContent = "Движок перезапускается с новым профилем…";
     } else if (operation === "autotune") {
       eyebrow.textContent = "АВТОПОДБОР";
       title.textContent = "Ищем рабочую стратегию";
       subtitle.textContent =
-        state.autotuneStep || "Проверяем доступность YouTube, Discord и Cloudflare…";
+        state.autotuneStep || "Проверяем YouTube, Discord и Cloudflare…";
     } else if (running) {
       const active = status.active_config || {};
-      eyebrow.textContent = "ОБХОД АКТИВЕН";
+      eyebrow.textContent = "ЗАЩИТА АКТИВНА";
       title.textContent = "Трафик защищён";
-      const presetName = active.preset_name || preset?.name || "Стратегия";
-      subtitle.textContent = `${presetName} · ${modeLabel(active.mode || state.settings.mode)}. WinDivert фильтрует выбранный трафик.`;
+      const presetName = active.preset_name || preset?.name || "Профиль";
+      const quic = active.block_quic ? "QUIC переведён на TCP" : "QUIC разрешён";
+      subtitle.textContent = `${presetName} · ${modeLabel(active.mode || state.settings.mode)} · ${quic}.`;
     } else if (status.last_error) {
       eyebrow.textContent = "ОСТАНОВЛЕН";
-      title.textContent = "winws завершился";
-      subtitle.textContent = truncate(status.last_error, 150);
+      title.textContent = "Движок остановился";
+      subtitle.textContent = truncate(status.last_error, 170);
     } else {
-      eyebrow.textContent = "ОБХОД ВЫКЛЮЧЕН";
-      title.textContent = "Защита не запущена";
+      eyebrow.textContent = "ЗАЩИТА ВЫКЛЮЧЕНА";
+      title.textContent = "Готов к запуску";
       if (preset) {
-        subtitle.textContent = `Стратегия: ${preset.name} · ${preset.label}. Нажмите «Запустить обход».`;
+        subtitle.textContent = `${preset.name} · ${preset.label}. Одна кнопка — и движок сам подберёт рабочую стратегию.`;
       } else {
-        subtitle.textContent = "Загрузите корректный presets.json, чтобы выбрать стратегию.";
+        subtitle.textContent = "Загрузите корректный presets.json, чтобы выбрать профиль.";
       }
     }
 
     const showFoot = running && !operation;
     setHidden(foot, !showFoot);
+    const stats = status.stats || {};
+    setText("stat-packets", running ? formatNumber(stats.packets) : "—");
+    setText("stat-split", running ? formatNumber(stats.split_packets) : "—");
+    setText(
+      "stat-quic",
+      running
+        ? status.block_quic || status.active_config?.block_quic
+          ? "TCP"
+          : "on"
+        : "—"
+    );
     if (showFoot) {
       setText("uptime", formatUptime(status.uptime_seconds));
-      setText("pid", status.pid ?? "—");
+      setText("pid", status.pid ?? "native");
       const activeMode = status.active_config?.mode || state.settings.mode;
-      const game = status.active_config?.game_filter;
-      setText("active-mode", `${modeLabel(activeMode)}${game ? " · Game" : ""}`);
+      const quic = status.active_config?.block_quic ? " · QUIC→TCP" : "";
+      setText("active-mode", `${modeLabel(activeMode)}${quic}`);
+    } else {
+      setText("uptime", formatUptime(status.uptime_seconds));
     }
 
     const toggle = $("btn-toggle");
@@ -525,10 +551,10 @@
       toggleLabel.textContent = "Автоподбор…";
       setUseIcon(toggleIcon, "refresh");
     } else if (running) {
-      toggleLabel.textContent = "Остановить обход";
+      toggleLabel.textContent = "Выключить защиту";
       setUseIcon(toggleIcon, "stop");
     } else {
-      toggleLabel.textContent = "Запустить обход";
+      toggleLabel.textContent = "Включить защиту";
       setUseIcon(toggleIcon, "play");
     }
     toggle.dataset.state = running ? "on" : "off";
@@ -555,7 +581,7 @@
     if (gameToggle) gameToggle.disabled = lockConfig;
 
     setHidden($("tab-log-live"), !running);
-    document.title = running ? "Zapret RU — обход активен" : "Zapret RU";
+    document.title = running ? "Zapret RU — защита активна" : "Zapret RU";
     renderLogState();
     updatePendingIndicator();
     renderCommand();
@@ -581,14 +607,12 @@
     if (dotLine) dotLine.className = "status-dot";
     if (status.running) {
       holder.classList.add("is-running");
-      setText("log-state-text", "winws работает");
+      setText("log-state-text", "движок работает");
     } else if (status.last_error) {
       holder.classList.add("is-error");
-      setText("log-state-text", "Остановлен с ошибкой");
-    } else if (status.last_exit_code != null) {
-      setText("log-state-text", "Остановлен");
+      setText("log-state-text", "остановлен с ошибкой");
     } else {
-      setText("log-state-text", "Ожидание запуска");
+      setText("log-state-text", "ожидание запуска");
     }
   }
 
@@ -597,12 +621,14 @@
     if (!bar) return;
     const active = state.status?.active_config || {};
     const running = isRunning();
+    const preset = selectedPreset();
+    const desiredQuic = Boolean(state.settings.block_quic && preset?.block_quic);
     const changed =
       running &&
       Boolean(active.preset_id) &&
       (active.preset_id !== state.settings.preset_id ||
         active.mode !== state.settings.mode ||
-        Boolean(active.game_filter) !== Boolean(state.settings.game_filter));
+        Boolean(active.block_quic) !== desiredQuic);
     setHidden(bar, !changed);
   }
 
@@ -682,6 +708,12 @@
     const game = $("game-filter");
     if (game) game.checked = Boolean(state.settings.game_filter);
 
+    const quic = $("block-quic-toggle");
+    if (quic) {
+      quic.checked = Boolean(state.settings.block_quic);
+      quic.disabled = state.blockQuicBusy;
+    }
+
     const tray = $("tray-toggle");
     if (tray) tray.checked = Boolean(state.settings.minimize_to_tray);
     const auto = $("autostart-toggle");
@@ -700,7 +732,7 @@
       renderStatus();
       scheduleCommandPreview();
     }
-    if (key === "mode" || key === "game_filter") {
+    if (key === "mode" || key === "game_filter" || key === "block_quic") {
       setText("mode-note", MODE_NOTES[state.settings.mode] || "");
       updatePendingIndicator();
       scheduleCommandPreview();
@@ -745,6 +777,21 @@
     renderStatus();
   }
 
+  async function onBlockQuicChanged(event) {
+    const input = event.target;
+    if (state.blockQuicBusy) return;
+    state.blockQuicBusy = true;
+    input.disabled = true;
+    try {
+      await persistSetting("block_quic", Boolean(input.checked));
+    } finally {
+      state.blockQuicBusy = false;
+      input.disabled = false;
+      renderStatus();
+      renderEnvironment();
+    }
+  }
+
   // -------------------------------------------------------------------- engine
   async function toggleBypass() {
     if (!state.ready || state.operation) return;
@@ -776,13 +823,13 @@
       if (result.ok === false) {
         showToast(result.error || "Не удалось выполнить операцию", "error", wasRunning ? "Остановка" : "Запуск");
       } else if (wasRunning) {
-        showToast("winws.exe остановлен, фильтры WinDivert сняты.", "success", "Обход остановлен");
+        showToast("Фильтры WinDivert сняты, трафик идёт напрямую.", "success", "Защита выключена");
       } else {
         const preset = selectedPreset();
         showToast(
-          `Стратегия ${preset ? `${preset.name} · ${preset.label}` : state.settings.preset_id} активна.`,
+          `${preset ? `${preset.name} · ${preset.label}` : state.settings.preset_id}. Движок работает.`,
           "success",
-          "Обход запущен"
+          "Защита включена"
         );
       }
     } catch (error) {
@@ -816,9 +863,9 @@
       if (result.usage) applyUsage(result.usage);
       if (result.environment) updateEnvironment(result.environment, { render: false });
       if (result.ok === false) {
-        showToast(result.error || "Не удалось перезапустить winws.exe", "error", "Перезапуск");
+        showToast(result.error || "Не удалось перезапустить движок", "error", "Перезапуск");
       } else {
-        showToast("winws.exe перезапущен с новыми параметрами.", "success", "Настройки применены");
+        showToast("Движок перезапущен с новыми параметрами.", "success", "Настройки применены");
       }
     } catch (error) {
       showToast(error.message || String(error), "error", "Перезапуск");
@@ -870,23 +917,41 @@
     const status = state.status || {};
     const env = state.environment || {};
     const usage = state.usage || {};
-    const led = $("statusline-led");
-    if (led) {
-      led.classList.toggle("is-on", Boolean(status.running));
-      led.classList.toggle("is-error", Boolean(status.last_error) && !status.running);
-    }
-    setText("statusline-engine", status.running ? "engine:on" : "engine:off");
-    setText(
-      "statusline-mode",
-      `mode:${status.active_config?.mode || state.settings.mode || "list"}${
-        status.active_config?.game_filter || state.settings.game_filter ? "+game" : ""
-      }`
+    const running = Boolean(status.running);
+    const mode = status.active_config?.mode || state.settings.mode || "global";
+    const blockQuic = Boolean(
+      status.active_config?.block_quic ?? state.settings.block_quic
     );
+    for (const led of [$("statusline-led-dot"), $("statusline-led")]) {
+      if (!led) continue;
+      led.classList.toggle("is-on", running);
+      led.classList.toggle("is-error", Boolean(status.last_error) && !running);
+    }
+    setText("statusline-engine", running ? "engine:on" : "engine:off");
+    setText("statusline-mode", `mode:${mode}${blockQuic ? "+quic-tcp" : ""}`);
     setText(
       "statusline-session",
       `session:${formatUptime(usage.session_seconds || status.uptime_seconds || 0)}`
     );
     setText("statusline-admin", `root:${env.admin ? "yes" : "no"}`);
+    setText("side-engine", running ? "Защита включена" : "Защита выключена");
+    setText("side-mode", `${modeLabel(mode)}${blockQuic ? " · QUIC→TCP" : ""}`);
+    const preset = selectedPreset();
+    const desiredSplit = status.active_config?.split ?? preset?.split;
+    const splitLabel =
+      desiredSplit === "sni" ? "SNI" : desiredSplit != null ? String(desiredSplit) : "—";
+    setText("quick-split", splitLabel);
+    setText("quick-mode", modeLabel(mode));
+    setText("mode-scope", modeLabel(mode).toLowerCase());
+    const chip = $("engine-chip");
+    if (chip) {
+      chip.textContent = running
+        ? "защита активна"
+        : env.admin === false
+          ? "нужен администратор"
+          : "движок готов";
+      chip.classList.toggle("is-warn", env.admin === false);
+    }
   }
 
   // --------------------------------------------------------------- environment
@@ -907,8 +972,8 @@
   }
 
   function renderVersion() {
-    const version = state.data?.app?.version || "1.1.0";
-    setText("app-version", `[v${version}]`);
+    const version = state.data?.app?.version || "1.2.0";
+    setText("app-version", `v${version}`);
     setText("settings-version", `v${version}`);
     for (const element of $$(".about-version")) element.textContent = `v${version}`;
     const auto = $("autostart-toggle");
@@ -939,7 +1004,6 @@
     if (!banner) return;
     const env = state.environment;
     const missingRequired = env?.missing_required || [];
-    const missingOptional = env?.missing_optional || [];
     const foreign = env?.foreign_winws || [];
     const lists = env?.lists || {};
     const presetsError = state.presetsError || env?.presets_error;
@@ -956,8 +1020,8 @@
     } else if (!env) {
       issue = {
         danger: false,
-        title: "Проверка окружения",
-        text: "Не удалось получить состояние файлов.",
+        title: "Проверка движка",
+        text: "Не удалось получить состояние компонентов.",
         primary: { label: "Проверить снова", action: "refresh_env" },
         secondary: null,
       };
@@ -965,26 +1029,34 @@
       issue = {
         danger: true,
         title: "Нет прав администратора",
-        text: "winws.exe не сможет подключиться к WinDivert. Перезапустите приложение и разрешите UAC.",
+        text: "WinDivert не сможет перехватить трафик. Перезапустите приложение и разрешите UAC.",
         primary: { label: "Настройки", action: "open_settings" },
         secondary: null,
+      };
+    } else if (env.engine_error) {
+      issue = {
+        danger: true,
+        title: "Движок не загрузился",
+        text: env.engine_error,
+        primary: { label: "Проверить снова", action: "refresh_env" },
+        secondary: { label: "Открыть данные", action: "open_data" },
       };
     } else if (missingRequired.length) {
       issue = {
         danger: true,
-        title: "Не хватает файлов zapret",
-        text: `В папке bin нет: ${missingRequired.join(", ")}. Скопируйте компоненты оригинального zapret.`,
-        primary: { label: "Открыть bin", action: "open_bin" },
+        title: "Не найден драйвер WinDivert",
+        text: `В сборке нет: ${missingRequired.join(", ")}. Переустановите приложение из официального релиза.`,
+        primary: { label: "Открыть данные", action: "open_data" },
         secondary: { label: "Проверить снова", action: "refresh_env" },
       };
     } else if (foreign.length) {
       const pids = foreign.map((item) => item.pid).join(", ");
       issue = {
-        danger: true,
-        title: "Найден другой winws.exe",
-        text: `PID ${pids}. Остановите его вручную, чтобы фильтры WinDivert не конфликтовали.`,
+        danger: false,
+        title: "Найден старый winws.exe",
+        text: `PID ${pids}. Новый движок не зависит от него, но старый процесс лучше закрыть.`,
         primary: { label: "Проверить снова", action: "refresh_env" },
-        secondary: { label: "Открыть bin", action: "open_bin" },
+        secondary: null,
       };
     } else if (lists.general?.present === false || lists.exclude?.present === false) {
       issue = {
@@ -992,14 +1064,6 @@
         title: "Не найден файл списка",
         text: "Файлы list-general.txt и list-exclude.txt должны существовать в папке lists.",
         primary: { label: "Открыть lists", action: "open_lists" },
-        secondary: { label: "Проверить снова", action: "refresh_env" },
-      };
-    } else if (missingOptional.length) {
-      issue = {
-        danger: false,
-        title: "Неполный набор .bin",
-        text: `Не найдены: ${missingOptional.join(", ")}. Будут использованы встроенные фейки zapret.`,
-        primary: { label: "Открыть bin", action: "open_bin" },
         secondary: { label: "Проверить снова", action: "refresh_env" },
       };
     }
@@ -1074,16 +1138,17 @@
       }
     }
 
-    addGroup("Обязательные", env.required || [], false);
-    addGroup("Фейковые пакеты · .bin", env.optional || [], true);
+    addGroup("Встроенный драйвер", env.required || [], false);
 
     const requiredTotal = (env.required || []).length;
     const requiredPresent = (env.required || []).filter((file) => file.present).length;
-    const optionalPresent = (env.optional || []).filter((file) => file.present).length;
-    if (requiredPresent === requiredTotal) {
-      setText("engine-summary", `Готов к запуску · ${optionalPresent} / ${(env.optional || []).length} .bin`);
+    if (env.engine_error) {
+      setText("engine-summary", "Ошибка загрузки pydivert");
+    } else if (requiredPresent === requiredTotal) {
+      const version = env.engine_version ? ` · pydivert ${env.engine_version}` : "";
+      setText("engine-summary", `Готов к запуску${version}`);
     } else {
-      setText("engine-summary", `Не хватает ${requiredTotal - requiredPresent} обязательных файлов`);
+      setText("engine-summary", `Не хватает ${requiredTotal - requiredPresent} компонентов`);
     }
   }
 
@@ -1117,7 +1182,7 @@
       if (result.ok === false) throw new Error(result.error || "Проверка не удалась");
       state.environment = result;
       renderEnvironment();
-      if (showSuccess) showToast("Состояние файлов и процессов обновлено.", "success", "Проверка");
+      if (showSuccess) showToast("Компоненты движка и списки проверены.", "success", "Проверка");
     } catch (error) {
       showToast(error.message || String(error), "error", "Проверка файлов");
     } finally {
@@ -1132,8 +1197,8 @@
     if (!action) return;
     if (action === "refresh_env") {
       await refreshEnvironment();
-    } else if (action === "open_bin") {
-      await openFolder("bin");
+    } else if (action === "open_data" || action === "open_bin") {
+      await openFolder("data");
     } else if (action === "open_lists") {
       await openFolder("lists");
     } else if (action === "open_presets") {
@@ -1312,16 +1377,16 @@
       return false;
     }
     if (!env.admin) {
-      showToast("Для запуска winws нужны права администратора.", "error", "Автоподбор");
+      showToast("Для WinDivert нужны права администратора.", "error", "Автоподбор");
       return false;
     }
     const missing = env.missing_required || [];
     if (missing.length) {
-      showToast(`Нет файлов: ${missing.join(", ")}. Откройте папку bin.`, "error", "Автоподбор");
+      showToast(`Нет компонентов: ${missing.join(", ")}.`, "error", "Автоподбор");
       return false;
     }
-    if (env.foreign_winws?.length) {
-      showToast("Остановите другой процесс winws.exe и повторите.", "error", "Автоподбор");
+    if (env.engine_error) {
+      showToast(env.engine_error, "error", "Автоподбор");
       return false;
     }
     return true;
@@ -1365,7 +1430,7 @@
           if (startResult.usage) applyUsage(startResult.usage);
           if (startResult.environment) updateEnvironment(startResult.environment, { render: false });
           if (!startResult.ok) {
-            throw new Error(startResult.error || "winws не запустился");
+            throw new Error(startResult.error || "движок не запустился");
           }
           await delay(1500);
           checkResult = await invoke("check_connectivity");
@@ -1427,7 +1492,7 @@
           updateEnvironment(finalResult.environment, { render: false });
         }
         if (finalResult.ok === false) {
-          throw new Error(finalResult.error || "Лучший пресет не запустился повторно");
+          throw new Error(finalResult.error || "Лучший профиль не запустился повторно");
         }
         state.settings.preset_id = best.preset.id;
         const latency =
@@ -1459,7 +1524,7 @@
         for (const id of SERVICE_IDS) setServiceState(id, "fail", "Ошибка", "");
         setText(
           "diag-foot",
-          "Автоподбор не нашёл рабочую стратегию. Проверьте DNS, bin и доступность сети."
+          "Автоподбор не нашёл рабочую стратегию. Проверьте DNS, списки и доступность сети."
         );
         $("diag-foot")?.classList.add("is-warning");
         showToast(
@@ -1591,8 +1656,8 @@
     setText(
       "list-hint-text",
       state.listKey === "exclude"
-        ? "Строка ru исключает всю зону .ru, xn--p1ai — .рф. Исключения действуют по SNI/Host. Список перечитывается автоматически."
-        : "По одному домену на строку. Строки с # — комментарии. Список перечитывается winws автоматически."
+        ? "Строка ru исключает всю зону .ru, xn--p1ai — .рф. Исключения действуют по SNI/Host. Изменения применяются сразу."
+        : "По одному домену на строку. Строки с # — комментарии. Движок применяет изменения сразу."
     );
     const fileLabel = $("list-filename");
     if (fileLabel) fileLabel.title = entry.path || "";
@@ -1678,7 +1743,7 @@
       updateListCountPills();
       const count = result.entries ?? countDomains(text);
       showToast(
-        `Сохранено ${count} ${plural(count, "домен", "домена", "доменов")}. winws перечитает файл автоматически.`,
+        `Сохранено ${count} ${plural(count, "домен", "домена", "доменов")}. Движок применил список сразу.`,
         "success",
         "Список сохранён"
       );
@@ -1809,7 +1874,7 @@
       const result = await invoke("clear_logs");
       if (result.ok === false) throw new Error(result.error || "Не удалось очистить логи");
       clearLogViewLocal();
-      showToast("Журнал интерфейса очищен. winws продолжает работу.", "success", "Логи");
+      showToast("Журнал интерфейса очищен. Движок продолжает работу.", "success", "Логи");
     } catch (error) {
       showToast(error.message || String(error), "error", "Логи");
     }
@@ -1845,7 +1910,7 @@
       state.currentCommand ||
       (state.previewError
         ? `Предпросмотр недоступен: ${state.previewError}`
-        : "Запустите обход, чтобы увидеть команду winws.exe.");
+        : "Запустите защиту, чтобы увидеть параметры движка.");
     const button = $("btn-copy-command");
     if (button) button.disabled = !state.currentCommand;
   }
@@ -1925,6 +1990,21 @@
       );
     });
 
+    const toggleMaximize = () => {
+      void invoke("window_toggle_maximize")
+        .then((result) => {
+          if (result.ok === false) throw new Error(result.error || "Окно недоступно");
+          state.maximized = Boolean(result.maximized);
+          const icon = $("#btn-maximize use");
+          if (icon) icon.setAttribute("href", state.maximized ? "#i-restore" : "#i-maximize");
+        })
+        .catch((error) =>
+          showToast(error.message || String(error), "error", "Окно")
+        );
+    };
+    $("#btn-maximize")?.addEventListener("click", toggleMaximize);
+    $("#titlebar-drag")?.addEventListener("dblclick", toggleMaximize);
+
     $("#btn-window-close")?.addEventListener("click", () => {
       void invoke("window_close").catch((error) =>
         showToast(error.message || String(error), "error", "Окно")
@@ -1942,6 +2022,7 @@
       button.addEventListener("click", () => void onModeClicked(button));
     }
     $("game-filter")?.addEventListener("change", (event) => void onGameChanged(event));
+    $("block-quic-toggle")?.addEventListener("change", (event) => void onBlockQuicChanged(event));
     $("btn-toggle")?.addEventListener("click", () => void toggleBypass());
     $("btn-reapply")?.addEventListener("click", () => void reapplySettings());
     $("btn-test")?.addEventListener("click", () => void runConnectivityCheck());
@@ -1951,11 +2032,14 @@
     $("banner-open")?.addEventListener("click", () => void handleBannerAction("secondary"));
 
     $("btn-open-lists-folder")?.addEventListener("click", () => void openFolder("lists"));
-    $("btn-open-bin")?.addEventListener("click", () => void openFolder("bin"));
+    $("btn-open-bin")?.addEventListener("click", () => void openFolder("data"));
     $("btn-open-data")?.addEventListener("click", () => void openFolder("data"));
     $("btn-open-presets-file")?.addEventListener("click", () => void openFolder("presets"));
     $("btn-refresh-engine")?.addEventListener("click", () => void refreshEnvironment());
     $("btn-reload-presets")?.addEventListener("click", () => void reloadPresets());
+    $("btn-link-github")?.addEventListener("click", () => void openExternal("github"));
+    $("btn-link-releases")?.addEventListener("click", () => void openExternal("releases"));
+    $("btn-link-driver")?.addEventListener("click", () => void openExternal("driver"));
     $("btn-link-zapret")?.addEventListener("click", () => void openExternal("zapret"));
     $("btn-link-bundle")?.addEventListener("click", () => void openExternal("bundle"));
 

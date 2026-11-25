@@ -24,9 +24,10 @@ class SettingsStoreTests(unittest.TestCase):
     def test_update_is_atomic_and_validated(self):
         store = SettingsStore(self.path)
         store.load()
-        result = store.update({"mode": "global", "game_filter": True})
+        result = store.update({"mode": "global", "game_filter": True, "block_quic": False})
         self.assertEqual(result["mode"], "global")
         self.assertTrue(result["game_filter"])
+        self.assertFalse(result["block_quic"])
         persisted = json.loads(self.path.read_text(encoding="utf-8"))
         self.assertEqual(persisted["mode"], "global")
 

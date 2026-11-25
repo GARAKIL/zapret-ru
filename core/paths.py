@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 APP_NAME = "Zapret RU"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 APP_ID = "ZapretRU"
+APP_ENGINE = "native"
 APP_MUTEX = r"Global\ZapretRU.Launcher.v1"
 
 _PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -30,8 +33,7 @@ def _executable_dir() -> Path:
     """Folder containing the launcher executable (or main.py in source mode).
 
     In Nuitka onefile builds sys.argv[0] points at the original executable,
-    while __file__ points inside the temporary extraction directory. We need
-    the real executable folder for the external WinDivert/zapret binaries.
+    while __file__ points inside the temporary extraction directory.
     """
     argv0 = Path(sys.argv[0]).expanduser()
     try:
@@ -107,10 +109,34 @@ def ensure_data_files(paths: AppPaths) -> list[str]:
             shutil.copyfile(source, target)
             notes.append(f"Создан список по умолчанию: {target}")
 
-    if not paths.presets_file.exists():
-        source = paths.resource_dir / "presets.json"
-        if source.is_file():
+    source = paths.resource_dir / "presets.json"
+    if source.is_file():
+        if not paths.presets_file.exists():
             shutil.copyfile(source, paths.presets_file)
-            notes.append(f"Создан файл пресетов: {paths.presets_file}")
+            notes.append(f"Создан файл профилей: {paths.presets_file}")
+        else:
+            try:
+                current = json.loads(
+                    paths.presets_file.read_text(encoding="utf-8-sig")
+                )
+            except (OSError, ValueError):
+                current = {}
+            if current.get("schema_version") != 2:
+                suffix = time.strftime("%Y%m%d-%H%M%S")
+                backup = paths.presets_file.with_name(
+                    f"presets.legacy-{suffix}.json"
+                )
+                try:
+                    paths.presets_file.replace(backup)
+                    shutil.copyfile(source, paths.presets_file)
+                    notes.append(
+                        "Старые профили winws сохранены как "
+                        f"{backup.name}; загружены профили встроенного движка."
+                    )
+                except OSError:
+                    notes.append(
+                        "Не удалось обновить presets.json до версии 2. "
+                        "Удалите его вручную и перезапустите приложение."
+                    )
 
     return notes

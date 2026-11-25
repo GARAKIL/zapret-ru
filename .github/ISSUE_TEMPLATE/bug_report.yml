@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         Не прикладывайте пароли, токены и персональные данные.
-        Проверьте `launcher.log` и выберите последние строки лога winws.
+        Проверьте `launcher.log` и приложите последние строки вкладки «Журнал».
   - type: input
     id: version
     attributes:
       label: Версия Zapret RU
-      placeholder: 1.1.0
+      placeholder: 1.2.0
     validations:
       required: true
   - type: input
@@ -34,17 +34,17 @@ body:
     attributes:
       label: Режим
       options:
+        - Все программы
         - По списку
-        - Всё
-        - По списку + Game Filter
-        - Всё + Game Filter
+        - Все программы + QUIC → TCP
+        - По списку + QUIC → TCP
     validations:
       required: true
   - type: input
     id: preset
     attributes:
-      label: Пресет
-      placeholder: General / ALT 1 / ALT 2 / ALT 3 / ALT 4
+      label: Профиль
+      placeholder: Умный / Быстрый / Ровный / Глубокий / Без QUIC-фильтра
     validations:
       required: true
   - type: textarea
@@ -52,8 +52,8 @@ body:
     attributes:
       label: Как воспроизвести
       placeholder: |
-        1. Скопировал bin из zapret ...
-        2. Запустил ...
+        1. Запустил ZapretRU.exe ...
+        2. Включил защиту ...
         3. Открыл ...
     validations:
       required: true
@@ -62,7 +62,7 @@ body:
     attributes:
       label: Логи (без личных данных)
       render: text
-      description: Вставьте последние строки вкладки «Логи» или launcher.log.
+      description: Вставьте последние строки вкладки «Журнал» или launcher.log.
   - type: checkboxes
     id: checks
     attributes:
@@ -70,7 +70,7 @@ body:
       options:
         - label: Я проверил последнюю версию из Releases и контрольную сумму SHA-256
           required: true
-        - label: Я использую официальный winws.exe / WinDivert из zapret bol-van
+        - label: Я использую официальный релиз Zapret RU, а не стороннюю пересборку
           required: true
         - label: В логах нет паролей, токенов и персональных данных
           required: true

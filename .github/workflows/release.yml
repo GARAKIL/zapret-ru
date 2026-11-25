@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to publish (for example v1.1.0)"
+        description: "Existing tag to publish (for example v1.2.0)"
         required: true
 
 permissions:
@@ -58,12 +58,25 @@ jobs:
         run: |
           $tag = $env:RELEASE_TAG
           if (-not $tag) { throw "Release tag is empty" }
+          $assets = @(
+            "dist/ZapretRU.exe",
+            "dist/SHA256SUMS.txt",
+            "dist/THIRD_PARTY_NOTICES.txt",
+            "dist/THIRD_PARTY_LICENSES.zip"
+          ) | Where-Object { Test-Path $_ }
           $existing = gh release view $tag 2>$null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag "dist/ZapretRU.exe" "dist/SHA256SUMS.txt" --clobber
+            gh release upload $tag @assets --clobber
           } else {
-            gh release create $tag "dist/ZapretRU.exe" "dist/SHA256SUMS.txt" `
-              --title "Zapret RU $tag" `
-              --generate-notes `
-              --notes "Windows launcher for original bol-van/zapret. No zapret binaries are bundled; put official bin/ files next to ZapretRU.exe. Verify SHA256SUMS.txt before running."
+            $notesFile = "docs/RELEASE_$($tag.TrimStart('v')).md"
+            if (Test-Path $notesFile) {
+              gh release create $tag @assets `
+                --title "Zapret RU $tag" `
+                --notes-file $notesFile
+            } else {
+              gh release create $tag @assets `
+                --title "Zapret RU $tag" `
+                --generate-notes `
+                --notes "Self-contained Windows DPI bypass with a built-in WinDivert engine. No winws.exe, no zapret binaries. Verify SHA256SUMS.txt and read THIRD_PARTY_NOTICES.txt before running."
+            }
           }

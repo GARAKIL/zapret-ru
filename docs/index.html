@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zapret RU — свой DPI-движок для Windows</title>
+  <meta name="description" content="Zapret RU — самостоятельный обход DPI для Windows: свой WinDivert-движок, SNI split, QUIC → TCP, один exe, большое окно и автоподбор. Без winws, рекламы и телеметрии.">
+  <meta name="keywords" content="zapret, zapret ru, обход блокировок, DPI bypass, YouTube, Discord, QUIC, SNI split, WinDivert, Windows, ТСПУ, desync">
+  <meta property="og:title" content="Zapret RU — свой DPI-движок для Windows">
+  <meta property="og:description" content="Один exe. Свой движок. SNI split и QUIC → TCP. Без winws, рекламы и телеметрии.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://garakil.github.io/zapret-ru/">
+  <meta property="og:image" content="https://garakil.github.io/zapret-ru/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://garakil.github.io/zapret-ru/">
+  <link rel="icon" href="screenshots/home.png">
+  <style>
+    :root {
+      --bg: #07080d;
+      --panel: rgba(255, 255, 255, 0.06);
+      --line: rgba(255, 255, 255, 0.1);
+      --text: #f6f8ff;
+      --soft: #cbd1e2;
+      --muted: #8f96ad;
+      --accent: #7c5cff;
+      --accent2: #38a7ff;
+      --green: #32d74b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      background:
+        radial-gradient(46% 42% at 12% 0%, rgba(124, 92, 255, 0.28), transparent 66%),
+        radial-gradient(38% 38% at 92% 4%, rgba(56, 167, 255, 0.2), transparent 68%),
+        radial-gradient(36% 34% at 76% 94%, rgba(50, 215, 75, 0.12), transparent 70%),
+        linear-gradient(145deg, #07080d, #0a0c15 55%, #07080d);
+      min-height: 100vh;
+    }
+    a { color: #c9c2ff; text-decoration: none; }
+    a:hover { color: #fff; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    header { padding: 26px 0; display: flex; align-items: center; gap: 14px; }
+    .logo { width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(124,92,255,.4); display: grid; place-items: center; background: linear-gradient(150deg, rgba(124,92,255,.3), rgba(56,167,255,.1)); }
+    .logo svg { width: 25px; height: 25px; }
+    .brand { font-weight: 700; letter-spacing: -0.02em; }
+    .brand small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
+    header nav { margin-left: auto; display: flex; gap: 18px; color: var(--muted); font-size: 13px; }
+    .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: center; padding: 54px 0 40px; }
+    .kicker { color: #c9c2ff; font-size: 11px; letter-spacing: .18em; font-weight: 700; }
+    h1 { font-size: clamp(38px, 5vw, 64px); line-height: 1.02; letter-spacing: -0.055em; margin: 12px 0 16px; }
+    .lead { color: var(--soft); font-size: 17px; max-width: 590px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 0 24px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+    .btn-primary { color: #fff; background: linear-gradient(120deg, var(--accent), var(--accent2)); box-shadow: 0 16px 40px rgba(83,94,255,.32); }
+    .btn-secondary { color: var(--soft); border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+    .shot { border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+    .shot img { display: block; width: 100%; height: auto; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .tag { color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: 11px; }
+    section { padding: 46px 0; border-top: 1px solid var(--line); }
+    h2 { font-size: 28px; letter-spacing: -0.035em; margin: 0 0 10px; }
+    .sub { color: var(--muted); margin: 0 0 26px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { border: 1px solid var(--line); border-radius: 20px; padding: 20px; background: var(--panel); }
+    .card b { display: block; margin-bottom: 6px; font-size: 14px; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: step; }
+    .step { border: 1px solid var(--line); border-radius: 20px; padding: 20px; background: var(--panel); }
+    .step::before { counter-increment: step; content: "0" counter(step); color: #c9c2ff; font-size: 11px; letter-spacing: .12em; }
+    .step b { display: block; margin: 8px 0 4px; }
+    .step p { margin: 0; color: var(--muted); font-size: 13px; }
+    .notice { border: 1px solid rgba(255,214,10,.24); background: rgba(255,214,10,.08); border-radius: 18px; padding: 18px 20px; color: #d8c47c; font-size: 13px; }
+    .faq { display: grid; gap: 10px; }
+    details { border: 1px solid var(--line); border-radius: 16px; padding: 15px 18px; background: var(--panel); }
+    summary { cursor: pointer; font-weight: 600; }
+    details p { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+    footer { padding: 34px 0 46px; color: var(--muted); font-size: 12px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; padding-top: 28px; }
+      .grid, .steps { grid-template-columns: 1fr; }
+      header nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="#0B0D13" stroke="rgba(255,255,255,.1)"/><path d="M10.6 12.2 16.2 16l-5.6 3.8" fill="none" stroke="#6CE8B1" stroke-width="2"/><path d="M19.1 19.8h5.1" fill="none" stroke="#EAF2EE" stroke-width="2"/></svg>
+      </span>
+      <div class="brand">Zapret RU<small>свой DPI-движок</small></div>
+      <nav>
+        <a href="#features">Возможности</a>
+        <a href="#start">Запуск</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/GARAKIL/zapret-ru">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="hero">
+        <div>
+          <div class="kicker">SELF-CONTAINED · WINDOWS 10/11</div>
+          <h1>Обход DPI<br>без winws.</h1>
+          <p class="lead">Один exe со своим WinDivert-движком: SNI split, QUIC → TCP и автоподбор. Большое окно, минимум кнопок, никакой рекламы и телеметрии.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://github.com/GARAKIL/zapret-ru/releases/latest">Скачать ZapretRU.exe</a>
+            <a class="btn btn-secondary" href="https://github.com/GARAKIL/zapret-ru">Исходный код</a>
+          </div>
+          <div class="tags">
+            <span class="tag">Windows 10/11</span>
+            <span class="tag">SNI split</span>
+            <span class="tag">QUIC → TCP</span>
+            <span class="tag">MIT</span>
+            <span class="tag">No telemetry</span>
+          </div>
+        </div>
+        <div class="shot">
+          <img src="screenshots/home.png" alt="Интерфейс Zapret RU" loading="eager">
+        </div>
+      </div>
+
+      <section id="features">
+        <h2>Что внутри</h2>
+        <p class="sub">Не обёртка над чужим winws. Собственный движок и собственный интерфейс.</p>
+        <div class="grid">
+          <div class="card"><b>SNI split</b><p>Режет TLS ClientHello внутри имени сайта, чтобы DPI не прочитал SNI из первого сегмента.</p></div>
+          <div class="card"><b>QUIC → TCP</b><p>Отключает UDP 443, и браузеры переходят на TCP, где разрез работает стабильнее.</p></div>
+          <div class="card"><b>Все программы</b><p>Перехват на уровне ОС: браузеры, Electron, лаунчеры и другие TCP-приложения.</p></div>
+          <div class="card"><b>Автоподбор</b><p>Проверяет профили по YouTube, Discord и Cloudflare и оставляет лучший.</p></div>
+          <div class="card"><b>Один exe</b><p>PyDivert и подписанный WinDivert уже внутри. Ничего не скачивается при запуске.</p></div>
+          <div class="card"><b>Без телеметрии</b><p>Только локальная статистика. Нет аккаунтов, рекламы и фоновых отчётов.</p></div>
+        </div>
+      </section>
+
+      <section id="start">
+        <h2>Как запустить</h2>
+        <p class="sub">Три шага, без папки bin и сторонних файлов.</p>
+        <div class="steps">
+          <div class="step"><b>Скачайте exe</b><p>Возьмите ZapretRU.exe из последнего GitHub Release.</p></div>
+          <div class="step"><b>Разрешите UAC</b><p>WinDivert — драйвер перехвата пакетов, ему нужны права администратора.</p></div>
+          <div class="step"><b>Включите защиту</b><p>Нажмите одну кнопку. Если сайт не открылся — запустите автоподбор.</p></div>
+        </div>
+        <p class="notice" style="margin-top:22px">Честно: 100% на всех провайдерах не бывает. Блокировки по IP, DNS, ECH и UDP-протоколы требуют отдельных мер. Автоподбор — лучший практический результат, а не магическая гарантия.</p>
+      </section>
+
+      <section id="faq">
+        <h2>Частые вопросы</h2>
+        <div class="faq">
+          <details><summary>Это VPN или прокси?</summary><p>Нет. Трафик не идёт через чужие серверы. Движок меняет сегментацию TCP на вашем ПК, поэтому пинг не растёт из-за плеча маршрутизации.</p></details>
+          <details><summary>Нужен ли zapret или winws.exe?</summary><p>Нет. Zapret RU 1.2.0 содержит собственный движок и встроенный WinDivert. Папка bin не нужна.</p></details>
+          <details><summary>Почему SmartScreen предупреждает?</summary><p>Сборка не подписана сертификатом Authenticode, а драйвер перехвата пакетов часто вызывает вопросы антивирусов. Проверяйте SHA-256 из релиза.</p></details>
+          <details><summary>Работает ли голос Discord и игры?</summary><p>Движок оптимизирован для TCP-сайтов и приложений. UDP 443 блокируется для перехода на TCP; голосовые UDP-порты остаются без изменений и могут требовать отдельных мер.</p></details>
+          <details><summary>Собирается ли проект локально?</summary><p>Да. Нужны Python 3.11+, Node для проверки JS и Nuitka. Команда: <code>build.bat</code>. Инструкция — в README.</p></details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Zapret RU · MIT · WinDivert/PyDivert под LGPL/GPL</span>
+      <span><a href="https://github.com/GARAKIL/zapret-ru">GitHub</a> · <a href="https://github.com/GARAKIL/zapret-ru/releases">Releases</a> · <a href="https://github.com/GARAKIL/zapret-ru/blob/main/SECURITY.md">Security</a></span>
+    </footer>
+  </div>
+</body>
+</html>

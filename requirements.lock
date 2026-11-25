@@ -6,6 +6,7 @@ ordered-set==4.1.0
 Pillow==12.3.0
 proxy_tools==0.1.0
 pycparser==3.12
+pydivert==4.0.1
 pystray==0.19.5
 pythonnet==3.2.1
 pywebview==6.2.1

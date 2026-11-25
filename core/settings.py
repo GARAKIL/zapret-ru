@@ -14,9 +14,10 @@ VALID_MODES = ("list", "global")
 VALID_TABS = ("home", "lists", "logs", "settings")
 
 DEFAULTS: dict[str, Any] = {
-    "preset_id": "general",
-    "mode": "list",
+    "preset_id": "smart",
+    "mode": "global",
     "game_filter": False,
+    "block_quic": True,
     "minimize_to_tray": True,
     "autostart": False,
     "last_tab": "home",
@@ -85,7 +86,12 @@ class SettingsStore:
                 if value not in VALID_MODES:
                     raise SettingsError("Режим должен быть list или global")
                 result[key] = value
-            elif key in ("game_filter", "minimize_to_tray", "autostart"):
+            elif key in (
+                "game_filter",
+                "block_quic",
+                "minimize_to_tray",
+                "autostart",
+            ):
                 if not isinstance(value, bool):
                     raise SettingsError(f"{key} должен быть логическим значением")
                 result[key] = value

@@ -14,8 +14,8 @@ from typing import Any
 from core import autostart
 from core.autostart import AutostartError
 from core.checker import check_services
+from core.engine import EngineConfig, NativeEngine, normalize_host
 from core.environment import scan_environment
-from core.manager import WinwsManager
 from core.paths import APP_NAME, APP_VERSION, AppPaths, ensure_data_files
 from core.presets import PresetError, PresetStore
 from core.settings import SettingsError, SettingsStore
@@ -31,6 +31,25 @@ log = logging.getLogger(__name__)
 
 class ApplicationError(Exception):
     """Friendly, user-facing service error."""
+
+
+def _load_domains(path: Path) -> frozenset[str]:
+    if not path.is_file():
+        return frozenset()
+    domains: set[str] = set()
+    try:
+        with path.open("r", encoding="utf-8-sig", errors="replace") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line or line.startswith(("#", ";", "/")):
+                    continue
+                token = line.split()[0]
+                host = normalize_host(token)
+                if host:
+                    domains.add(host)
+    except OSError:
+        return frozenset()
+    return frozenset(domains)
 
 
 class ApplicationCore:
@@ -49,11 +68,7 @@ class ApplicationCore:
         self._state_callback: Callable[[], None] | None = None
         self.usage = UsageStore(paths.data_dir / "usage.json")
         self.usage.start_launcher_session()
-        self.manager = WinwsManager(
-            executable=paths.bin_dir / "winws.exe",
-            working_dir=paths.bin_dir,
-            on_state_change=self._manager_state_changed,
-        )
+        self.manager = NativeEngine(on_state_change=self._manager_state_changed)
         self._normalise_selected_preset()
 
     # ---------------------------------------------------------------- startup
@@ -69,9 +84,8 @@ class ApplicationCore:
         available = {item["id"] for item in self.preset_store.public_presets()}
         current = self.settings.snapshot().get("preset_id")
         if current not in available and available:
-            fallback = next(iter(available))
             try:
-                self.settings.update({"preset_id": fallback})
+                self.settings.update({"preset_id": self.preset_store.default_id})
             except SettingsError:
                 pass
 
@@ -115,6 +129,7 @@ class ApplicationCore:
                 "version": APP_VERSION,
                 "task_name": autostart.TASK_NAME,
                 "task_command": autostart.task_command_line(),
+                "engine": "native",
             },
             "settings": self.settings.snapshot(),
             "presets": presets,
@@ -140,7 +155,6 @@ class ApplicationCore:
 
     def _public_paths(self) -> dict[str, str]:
         return {
-            "bin": str(self.paths.bin_dir),
             "data": str(self.paths.data_dir),
             "lists": str(self.paths.lists_dir),
             "presets": str(self.paths.presets_file),
@@ -149,10 +163,7 @@ class ApplicationCore:
         }
 
     def refresh_environment(self) -> dict[str, Any]:
-        environment = scan_environment(
-            self.paths,
-            exclude_pids=[self.manager.process_pid] if self.manager.process_pid else [],
-        )
+        environment = scan_environment(self.paths)
         environment["session"] = {
             "admin": environment.get("admin", False),
             "manager_running": self.manager.is_running(),
@@ -161,7 +172,7 @@ class ApplicationCore:
 
     def _require_preset_store(self) -> PresetStore:
         if self.preset_store is None:
-            raise ApplicationError(self.presets_error or "Пресеты не загружены")
+            raise ApplicationError(self.presets_error or "Профили не загружены")
         return self.preset_store
 
     def get_presets(self) -> dict[str, Any]:
@@ -187,62 +198,97 @@ class ApplicationCore:
         return self.get_presets()
 
     # ------------------------------------------------------------------ engine
-    def start_bypass(
+    def _build_engine_config(
         self, preset_id: str, mode: str, game_filter: bool
-    ) -> dict[str, Any]:
+    ) -> tuple[EngineConfig, dict[str, Any], list[str]]:
         if not isinstance(preset_id, str) or not isinstance(mode, str):
             raise ApplicationError("Некорректные параметры запуска")
         if not isinstance(game_filter, bool):
             raise ApplicationError("game_filter должен быть логическим значением")
         if mode not in ("list", "global"):
             raise ApplicationError("Неизвестный режим обхода")
+        store = self._require_preset_store()
+        try:
+            preset = store.get(preset_id)
+        except PresetError as exc:
+            raise ApplicationError(str(exc)) from exc
+        settings = self.settings.snapshot()
+        block_quic = bool(preset.block_quic and settings.get("block_quic", True))
+        include = _load_domains(self.paths.general_list)
+        exclude = _load_domains(self.paths.exclude_list)
+        config = EngineConfig(
+            profile_id=preset.id,
+            profile_name=preset.name,
+            split=preset.split,
+            block_quic=block_quic,
+            mode=mode,
+            include=include,
+            exclude=exclude,
+        )
+        active = {
+            "preset_id": preset.id,
+            "preset_name": preset.name,
+            "preset_label": preset.label,
+            "mode": mode,
+            "game_filter": game_filter,
+            "split": preset.split,
+            "block_quic": block_quic,
+            "engine": "native",
+        }
+        warnings: list[str] = []
+        if preset.caution:
+            warnings.append(preset.caution)
+        if mode == "list" and not include:
+            warnings.append(
+                "Список обхода пуст: добавьте домены или переключитесь на режим «Всё»."
+            )
+        if not exclude:
+            warnings.append(
+                "Список исключений пуст. Добавьте банки и госуслуги, чтобы не влиять на них."
+            )
+        return config, active, warnings
+
+    def start_bypass(
+        self, preset_id: str, mode: str, game_filter: bool
+    ) -> dict[str, Any]:
         if self.manager.is_running():
             raise ApplicationError("Обход уже запущен. Сначала остановите его.")
-
-        store = self._require_preset_store()
         environment = self.refresh_environment()
         if not environment.get("admin"):
             raise ApplicationError(
-                "winws.exe требует прав администратора. Перезапустите приложение от имени администратора."
+                "Для перехвата трафика нужны права администратора. "
+                "Перезапустите приложение и разрешите UAC."
+            )
+        if environment.get("engine_error"):
+            raise ApplicationError(
+                "Встроенный драйвер WinDivert не загрузился: "
+                f"{environment['engine_error']}"
             )
         if environment.get("missing_required"):
             missing = ", ".join(environment["missing_required"])
             raise ApplicationError(
-                f"В папке bin не хватает обязательных файлов: {missing}. "
-                "Скопируйте их из оригинального zapret для Windows."
+                f"Не найден встроенный драйвер: {missing}. "
+                "Переустановите приложение из официального релиза."
             )
-        foreign = environment.get("foreign_winws") or []
-        if foreign:
-            pids = ", ".join(str(item["pid"]) for item in foreign)
+        lists = environment.get("lists") or {}
+        if not (lists.get("general") or {}).get("present"):
+            raise ApplicationError("Не найден список обхода. Перезапустите приложение.")
+        if not (lists.get("exclude") or {}).get("present"):
             raise ApplicationError(
-                f"Обнаружен другой процесс winws.exe (PID: {pids}). "
-                "Остановите его, чтобы избежать конфликта фильтров WinDivert."
+                "Не найден список исключений. Перезапустите приложение."
             )
 
-        try:
-            build = store.build(
-                preset_id=preset_id,
-                mode=mode,
-                game_filter=game_filter,
-                general_list=self.paths.general_list,
-                exclude_list=self.paths.exclude_list,
-                bin_dir=self.paths.bin_dir,
-            )
-        except PresetError as exc:
-            raise ApplicationError(str(exc)) from exc
-
+        config, active, warnings = self._build_engine_config(
+            preset_id, mode, game_filter
+        )
         try:
             self.settings.update(
-                {
-                    "preset_id": preset_id,
-                    "mode": mode,
-                    "game_filter": game_filter,
-                }
+                {"preset_id": preset_id, "mode": mode, "game_filter": game_filter}
             )
         except SettingsError as exc:
             raise ApplicationError(str(exc)) from exc
 
-        result = self.manager.start(build.command, build.active_config())
+        result = self.manager.start(config, active)
         if result["ok"] and self.manager.is_running():
             self.usage.start_bypass()
         status = result["status"]
@@ -252,10 +298,10 @@ class ApplicationCore:
             "started": bool(result.get("started")),
             "status": status,
             "usage": self.usage.snapshot(),
-            "config": build.active_config(),
-            "command_line": build.command_line,
-            "warnings": build.warnings,
-            "skipped_files": build.skipped_files,
+            "config": active,
+            "command_line": status.get("command_line", ""),
+            "warnings": warnings,
+            "skipped_files": [],
             "environment": self.refresh_environment(),
         }
 
@@ -298,25 +344,26 @@ class ApplicationCore:
     def command_preview(
         self, preset_id: str, mode: str, game_filter: bool
     ) -> dict[str, Any]:
-        store = self._require_preset_store()
         try:
-            build = store.build(
-                preset_id=preset_id,
-                mode=mode,
-                game_filter=game_filter,
-                general_list=self.paths.general_list,
-                exclude_list=self.paths.exclude_list,
-                bin_dir=self.paths.bin_dir,
+            config, active, warnings = self._build_engine_config(
+                preset_id, mode, game_filter
             )
-        except PresetError as exc:
+        except ApplicationError as exc:
             return {"ok": False, "error": str(exc), "command_line": ""}
+        split = "SNI" if config.split in ("sni", "smart") else str(config.split)
+        quic = "QUIC → TCP" if config.block_quic else "QUIC разрешён"
+        scope = "все программы" if mode == "global" else f"{len(config.include)} доменов"
+        command_line = f"{config.profile_name}: split {split} · {quic} · {scope}"
         return {
             "ok": True,
-            "command_line": build.command_line,
-            "warnings": build.warnings,
-            "skipped_files": build.skipped_files,
-            "wf_tcp": build.wf_tcp,
-            "wf_udp": build.wf_udp,
+            "command_line": command_line,
+            "warnings": warnings,
+            "skipped_files": [],
+            "wf_tcp": "80,443",
+            "wf_udp": "443" if config.block_quic else "",
+            "split": config.split,
+            "block_quic": config.block_quic,
+            "profiles": active,
         }
 
     # ------------------------------------------------------------------ config
@@ -325,6 +372,7 @@ class ApplicationCore:
             "preset_id",
             "mode",
             "game_filter",
+            "block_quic",
             "minimize_to_tray",
             "last_tab",
         ):
@@ -333,7 +381,7 @@ class ApplicationCore:
             store = self._require_preset_store()
             ids = {preset["id"] for preset in store.public_presets()}
             if value not in ids:
-                raise ApplicationError("Неизвестный пресет")
+                raise ApplicationError("Неизвестный профиль")
         try:
             settings = self.settings.update({key: value})
         except SettingsError as exc:
@@ -455,6 +503,11 @@ class ApplicationCore:
                 except OSError:
                     pass
 
+        if self.manager.is_running():
+            self.manager.update_policy(
+                _load_domains(self.paths.general_list),
+                _load_domains(self.paths.exclude_list),
+            )
         entries = _count_entries(content)
         return {
             "ok": True,
@@ -463,7 +516,7 @@ class ApplicationCore:
             "backup": str(backup) if backup.exists() else None,
             "entries": entries,
             "saved_at": time.time(),
-            "message": "Список сохранён. winws автоматически перечитает изменённый файл.",
+            "message": "Список сохранён. Движок применил изменения сразу.",
         }
 
     # --------------------------------------------------------------- shutdown

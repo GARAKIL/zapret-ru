@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Оригинальный zapret
-    url: https://github.com/bol-van/zapret
-    about: Проблемы самого winws.exe и WinDivert решаются в оригинальном проекте.
+  - name: WinDivert
+    url: https://github.com/basil00/WinDivert
+    about: Проблемы драйвера WinDivert и его подписи решаются в оригинальном проекте.
+  - name: PyDivert
+    url: https://github.com/ffalcinelli/pydivert
+    about: Проблемы Python-обвязки PyDivert решаются в оригинальном проекте.

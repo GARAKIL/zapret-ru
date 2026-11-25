@@ -1,0 +1,41 @@
+Zapret RU third-party notices
+=============================
+
+Zapret RU contains its own packet-processing engine. It does not include or
+launch winws.exe, cygwin1.dll or zapret .bin payloads.
+
+WinDivert
+---------
+The executable bundles the official WinDivert 2.2 driver and DLL from
+https://github.com/basil00/WinDivert (Windows packet capture driver).
+WinDivert is dual-licensed under LGPL-3.0 and GPL-2.0. The full license text is
+in licenses/WinDivert-LICENSE.txt. WinDivert source code is available at:
+https://github.com/basil00/WinDivert
+
+PyDivert
+--------
+PyDivert 4.0.1 is used as the Python binding to WinDivert:
+https://github.com/ffalcinelli/pydivert
+PyDivert is licensed under LGPL-3.0-or-later OR GPL-2.0-or-later. The full
+LGPL-3.0 text is in licenses/LGPL-3.0.txt. Source code is available at the link
+above.
+
+Inter
+-----
+Inter font by Rasmus Andersson, SIL Open Font License 1.1.
+License text: ui/fonts/Inter-LICENSE.txt
+
+PyWebView, pystray, Pillow, pythonnet, Nuitka
+---------------------------------------------
+These Python packages retain their respective licenses. See their official
+project pages and the package metadata for details.
+
+Zapret RU application code
+--------------------------
+MIT License. See LICENSE.
+
+No warranty
+-----------
+The bundled driver is a kernel component. Install and run Zapret RU only from
+the official release and verify SHA256SUMS.txt. A local administrator can
+inspect or modify any unsigned application; native compilation is not DRM.

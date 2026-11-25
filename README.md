@@ -1,22 +1,22 @@
 # Zapret RU
 
 <p align="center">
-  <img src="assets/icon.png" width="88" height="88" alt="Zapret RU">
+  <img src="assets/icon.png" width="92" height="92" alt="Zapret RU">
 </p>
 
 <p align="center">
-  <b>Терминальный лаунчер для оригинального zapret на Windows.</b><br>
-  YouTube, Discord, QUIC и игровой UDP — без рекламы, аккаунтов и телеметрии.
+  <b>Свой DPI-движок для Windows. Один exe. Без winws и сторонних загрузок.</b><br>
+  YouTube, Discord, Cloudflare и все TCP-приложения — в одном большом окне.
 </p>
 
 <p align="center">
-  <a href="https://github.com/GARAKIL/zapret-ru/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/GARAKIL/zapret-ru?style=flat-square&labelColor=0b0d0c&color=6de8b1"></a>
+  <a href="https://github.com/GARAKIL/zapret-ru/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/GARAKIL/zapret-ru?style=flat-square&labelColor=07080d&color=7c5cff"></a>
   <a href="https://github.com/GARAKIL/zapret-ru/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GARAKIL/zapret-ru/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%2F11-6de8b1?style=flat-square&labelColor=0b0d0c">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-6de8b1?style=flat-square&labelColor=0b0d0c">
-  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-6de8b1?style=flat-square&labelColor=0b0d0c">
-  <img alt="No ads" src="https://img.shields.io/badge/ads-none-6de8b1?style=flat-square&labelColor=0b0d0c">
-  <img alt="No telemetry" src="https://img.shields.io/badge/telemetry-none-6de8b1?style=flat-square&labelColor=0b0d0c">
+  <img alt="Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%2F11-7c5cff?style=flat-square&labelColor=07080d">
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-7c5cff?style=flat-square&labelColor=07080d">
+  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-7c5cff?style=flat-square&labelColor=07080d">
+  <img alt="No ads" src="https://img.shields.io/badge/ads-none-7c5cff?style=flat-square&labelColor=07080d">
+  <img alt="No telemetry" src="https://img.shields.io/badge/telemetry-none-7c5cff?style=flat-square&labelColor=07080d">
 </p>
 
 <p align="center">
@@ -28,483 +28,213 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="360" alt="Главная — обход активен">
-  <img src="docs/screenshots/settings.png" width="360" alt="Настройки и локальная статистика">
+  <img src="docs/screenshots/home.png" width="540" alt="Главное окно Zapret RU">
+  <img src="docs/screenshots/settings.png" width="540" alt="Настройки и статистика">
+</p>
+<p align="center">
+  <img src="docs/screenshots/lists.png" width="540" alt="Списки доменов">
+  <img src="docs/screenshots/logs.png" width="540" alt="Журнал движка">
 </p>
 
-**Zapret RU** — компактный open-source лаунчер для Windows поверх оригинального
-[bol-van/zapret](https://github.com/bol-van/zapret). Не VPN, не прокси, не
-подписка. Трафик остаётся на вашем компьютере; приложение лишь запускает и
-останавливает `winws.exe` с выбранной desync-стратегией.
-
-> Проект не связан с bol-van и не распространяет бинарники zapret. Компоненты
-> `winws.exe`, WinDivert, `cygwin1.dll` и `.bin`-файлы нужно взять из
-> официального дистрибутива zapret.
+**Zapret RU 1.2.0** — самостоятельный Windows-клиент для обхода DPI/ТСПУ. Внутри
+собственный движок на WinDivert: он перехватывает исходящий TCP 80/443, находит
+SNI в TLS ClientHello или `Host` в HTTP и разрезает первый сегмент внутри имени
+сайта. Никакого `winws.exe`, `cygwin1.dll`, `.bin`-файлов и папки `bin` больше
+нет. Скачал один exe — запустил — нажал одну кнопку.
 
 > **Честно о «100%»:** ни один локальный обход DPI не работает на 100% у всех
-> провайдеров и не пробивает блокировки по IP, подмену DNS или VPN-протоколы.
-> Для разных ТСПУ нужны разные пресеты. Встроенный автоподбор помогает найти
-> рабочую стратегию именно для вашего подключения.
+> провайдеров. Блокировки по IP, подмена DNS, ECH и отдельные UDP-протоколы
+> требуют других мер. Встроенный автоподбор честно проверяет несколько
+> стратегий и выбирает лучшую для вашего подключения.
 
-## Скачать и запустить
+## Что нового в 1.2.0
 
-1. Скачайте `ZapretRU.exe` из раздела **Releases** этого репозитория.
-2. Положите рядом папку `bin` из официального Windows-дистрибутива zapret
-   (`winws.exe`, `WinDivert.dll`, `WinDivert64.sys`, `cygwin1.dll`).
-3. Запустите exe, разрешите UAC и нажмите **«Запустить обход»**.
+- **Собственный движок.** Больше не зависит от zapret и `winws.exe`. Логика
+  SNI-split, HTTP Host split и QUIC → TCP написана в этом проекте.
+- **Один файл.** `ZapretRU.exe` уже содержит интерфейс, PyDivert и подписанный
+  драйвер WinDivert. Ничего не скачивается при запуске.
+- **Большое окно 1120×800.** Настоящие кнопки свернуть / развернуть / закрыть,
+  перетаскивание за заголовок, двойной клик по заголовку.
+- **Новый UI.** Скругления, мягкие градиенты, анимации, крупные карточки и
+  минимум кнопок. Главное действие — одна кнопка «Включить защиту».
+- **Умный охват.** Режим «Все программы» для TCP 80/443 плюс список исключений
+  для банков и госуслуг. Режим «По списку» разрезает только выбранные домены.
+- **QUIC → TCP.** UDP 443 блокируется, чтобы браузеры и приложения переходили
+  на TCP, где разрез SNI работает стабильнее. Отключается одним тумблером.
+- **Горячее применение списков.** Сохранили список — движок сразу обновил
+  политику, без перезапуска.
+- **Локальная статистика.** Запуски, сессии, время в защите. Данные не покидают
+  компьютер.
 
-Если что-то не открывается — нажмите **«Подбор»**: лаунчер проверит все
-стратегии и оставит рабочую. Готовые сборки с исходников собираются через
-`build.bat`; ничего, кроме официального zapret и WebView2 Runtime, приложение
-само не скачивает.
-
----
-
-## Что умеет
-
-- **Автоподбор стратегии** — по одной кнопке проверяет все 5 пресетов по
-  YouTube, Discord и Cloudflare, выбирает лучший по доступности и задержке и
-  оставляет его активным.
-- **Два системных режима обхода**
-  - **По списку** — desync только для доменов из `lists/list-general.txt`,
-    работает во всех браузерах и программах.
-  - **Всё** — TCP 80/443 и UDP 443 для любого процесса, кроме доменов из
-    `lists/list-exclude.txt`.
-- **Game Filter** — дополнительно включает TCP/UDP-порты 1024–65535 для игр и
-  голосовых чатов.
-- **Голос Discord** — отдельный UDP-профиль для портов 19294–19344 и
-  50000–65535, с фильтром протоколов discord/stun.
-- **QUIC** — отдельный UDP 443-профиль (YouTube и другие сервисы).
-- **5 стратегий** в `presets.json`: fake + multisplit, fakedsplit + autottl +
-  badseq, split2 + md5sig, syndata + aggressive, только split без fake.
-- **Проверка доступа** — параллельные HTTPS-запросы к YouTube, Discord и
-  Cloudflare с таймаутом 3 секунды.
-- **Живые логи** stdout/stderr winws с цветными уровнями, копированием и
-  отображением фактической команды запуска.
-- **Редактор списков** с подсчётом доменов, атомарным сохранением и резервной
-  копией `.bak`. winws перечитывает изменённый список самостоятельно.
-- **Системный трей**: открыть окно, запустить/остановить обход, проверить
-  доступ, выйти.
-- **Автозапуск** при входе в Windows через задачу планировщика с повышенными
-  правами (`schtasks`, ONLOGON, HIGHEST).
-- **Локальная статистика**: запуски, сессии обхода и время использования.
-  Считается только на этом ПК, никуда не отправляется.
-- **Безопасное завершение winws**: `CREATE_NO_WINDOW`, захват вывода,
-  `terminate`, резервный `taskkill /F /T /PID`, `atexit`.
-- **Прозрачность**: нет рекламы, телеметрии, автоскачивания кода, фоновых
-  соединений и скрытых команд. Диагностика обращается в сеть только после
-  нажатия кнопки.
-
-## Что значит «на все программы»
-
-`winws` перехватывает трафик на уровне ОС через WinDivert, а не хукает
-отдельные приложения. Поэтому режим **«Всё»** действует на любой процесс,
-который использует TCP 80/443 или UDP 443, а режим списка — на эти домены в
-любом браузере/клиенте.
-
-Это не даёт магических 100% на любом ПК: стратегии зависят от регионального
-ТСПУ, маршрута, DNS и конкретного сервиса. Приложение не может ускорить
-соединение относительно прямого канала; оно не является прокси и не добавляет
-плечо маршрутизации. Задержки в диагностике показывают реальные HTTPS-ответы.
-
----
-
-## Требования
-
-- Windows 10/11 **x64**.
-- Права администратора (WinDivert).
-- WebView2 Runtime — обычно уже установлен в Windows 10/11. Если нет:
-  <https://developer.microsoft.com/microsoft-edge/webview2/>.
-- Оригинальные файлы zapret для Windows в папке `bin`.
-- Для запуска из исходников: **Python 3.11+ x64**.
-
----
-
-## Быстрый старт из исходников
-
-```powershell
-cd E:\ZapretRU
-
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-
-python main.py
-```
-
-Приложение запросит UAC и запустится от имени администратора.
-
-### Файлы zapret в `bin`
-
-Скопируйте `bin` из официального дистрибутива:
-
-- <https://github.com/bol-van/zapret>
-- <https://github.com/bol-van/zapret-win-bundle>
-
-Обязательные файлы:
-
-| Файл | Назначение |
-|---|---|
-| `winws.exe` | Движок desync из zapret |
-| `WinDivert.dll` | WinDivert userspace |
-| `WinDivert64.sys` | Драйвер перехвата для x64 |
-| `cygwin1.dll` | Cygwin runtime для winws |
-
-Рекомендуемые `.bin`-файлы:
-
-| Файл | Назначение |
-|---|---|
-| `quic_initial_www_google_com.bin` | фейковый QUIC Initial |
-| `tls_clienthello_www_google_com.bin` | фейковый TLS ClientHello |
-| `ACTIVE_DISCORD_UDP.bin` | фейк для Discord/STUN |
-| `ACTIVE_GAME_UDP.bin` | фейк для игрового UDP |
-
-Если `.bin`-файла нет, приложение **не падает**: соответствующий аргумент
-пропускается, и winws использует встроенный фейк. В интерфейсе появляется
-аккуратное уведомление. Для стабильного обхода лучше положить полный комплект.
-
-> Используйте только официальные источники. Сторонние архивы с winws и
-> WinDivert могут содержать вредоносный код. Приложение ничего не скачивает
-> само.
-
----
-
-## Режимы обхода
-
-### По списку (рекомендуется)
-
-`--hostlist=lists/list-general.txt` плюс
-`--hostlist-exclude=lists/list-exclude.txt`.
-
-Обход применяется только к доменам из основного списка. Поддомены учитываются
-автоматически. Голос Discord и Game Filter работают отдельными профилями.
-
-Этот режим безопаснее: российские банки, Госуслуги, Яндекс, VK и локальные
-сервисы не попадают под desync.
-
-### Всё
-
-Применяется ко всему TCP 80/443 и UDP 443, **кроме** доменов из
-`list-exclude.txt`.
-
-В базовом списке исключений уже есть строки:
+## Как это работает
 
 ```text
-ru
-xn--p1ai
+приложение → WinDivert (outbound TCP 80/443)
+           → TLS ClientHello / HTTP Host
+           → проверка include/exclude
+           → split внутри SNI или Host
+           → два TCP-сегмента, checksum пересчитан
 ```
 
-- `ru` исключает все домены зоны `.ru` (поддомены учитываются автоматически).
-- `xn--p1ai` — punycode зоны `.рф`.
-- Дополнительно перечислены Госуслуги, налог, банки, Яндекс, VK, Mail.ru,
-  Ozon, Wildberries, Avito и др.
+- WinDivert перехватывает трафик на уровне ОС, поэтому работает для браузеров,
+  Electron-приложений, игровых лаунчеров и других программ, а не только для
+  одного процесса.
+- Разрез делается внутри имени сайта. DPI, который смотрит только первый
+  сегмент, не видит полный SNI.
+- В режиме «Все программы» список исключений проверяется по SNI/Host: банки,
+  госуслуги и `.ru` можно исключить.
+- QUIC UDP 443 отбрасывается только когда включён тумблер «QUIC → TCP». Это
+  заставляет Chrome, Edge и YouTube использовать TCP.
+- Нет прокси, VPN и удалённого сервера. Пинг не увеличивается за счёт плеча
+  маршрутизации; диагностика показывает реальные HTTPS-задержки.
 
-Важно: исключения работают по SNI/Host. Трафик без имени домена, блокировки по
-IP и zero-phase методы (`syndata`) не могут фильтроваться по hostlist. В режиме
-«Всё» проверяйте российские сервисы после запуска.
+## Быстрый старт
 
-### Game Filter
+1. Скачайте `ZapretRU.exe` из [Releases](https://github.com/GARAKIL/zapret-ru/releases/latest).
+2. Запустите и разрешите UAC — WinDivert нужен доступ к пакетам.
+3. Нажмите **«Включить защиту»**.
+4. Если сайт не открывается — нажмите маленькую кнопку автоподбора рядом с
+   «Проверка сайтов». Приложение проверит все профили и оставит лучший.
+5. Для точечного обхода переключите «Все программы» на «По списку» и отредактируйте
+   список на вкладке **Списки**.
 
-Добавляет в `--wf-tcp` / `--wf-udp` порты 1024–65535 и создаёт отдельные
-профили с `--dpi-desync-any-protocol=1` и cutoff. Предназначен для игровых
-серверов и голосовых чатов. Это сознательно широкий режим: если он мешает
-другим UDP-приложениям, выключите его.
+Папки `bin` и отдельных файлов zapret не требуется.
 
----
+## Профили
 
-## Пресеты
+| Профиль | Что делает |
+|---|---|
+| **Умный** | SNI-split + QUIC → TCP. Рекомендуется. |
+| **Быстрый** | Split 1. Минимальное вмешательство. |
+| **Ровный** | Split 2. Компромисс для сложных DPI. |
+| **Глубокий** | Split 4. Мобильный интернет и глубокая проверка. |
+| **Без QUIC-фильтра** | SNI-split, UDP 443 разрешён. Для приложений с обязательным QUIC. |
 
-Стратегии лежат в `presets.json` и строятся генератором
-`core/presets.py`. В файле нет готовых команд с `--new`, `--filter-*` и
-`--hostlist`: приложение само добавляет режим, порты, hostlist/exclude и
-разделители профилей. Это защищает режимы «Список» и «Всё» от случайного
-смешивания.
+Автоподбор запускает профили по очереди, проверяет YouTube, Discord и
+Cloudflare, выбирает максимальную доступность и минимальную задержку.
 
-| id | Название | Метод |
-|---|---|---|
-| `general` | General — Универсальный | `fake,multisplit`, `fooling=ts`, QUIC + Discord UDP |
-| `alt1` | ALT 1 — Badseq / Autottl | `fake,fakedsplit`, `autottl=2`, `fooling=badseq` |
-| `alt2` | ALT 2 — Split2 / MD5Sig | `fake,split2`, `fooling=md5sig` |
-| `alt3` | ALT 3 — Syndata / Агрессивный | `syndata,fake,multisplit`, badseq/autottl, увеличенные повторы |
-| `alt4` | ALT 4 — Без Fake / Только Split | `multisplit` без fake-пакетов, `udplen` для UDP |
+## Проверка доступа
 
-`split2` в актуальном winws является совместимым синонимом `multisplit`.
-
-Рекомендуемый порядок проверки: **General → ALT 1 → ALT 2 → ALT 4 → ALT 3**.
-Выбор зависит от провайдера и ТСПУ. Если стратегия перестала работать,
-провайдер мог изменить фильтрацию.
-
-### Как редактировать presets.json
-
-Каждый пресет содержит блоки:
-
-```json
-{
-  "id": "general",
-  "name": "General",
-  "label": "Универсальный",
-  "description": "...",
-  "caution": null,
-  "quic": ["--dpi-desync=fake", "..."],
-  "discord": ["..."],
-  "tcp": ["..."],
-  "game_tcp": ["..."],
-  "game_udp": ["..."]
-}
-```
-
-- `@BIN/name.bin` заменяется на абсолютный путь к `bin/name.bin`.
-- Если файла нет, аргумент пропускается.
-- Аргументы с `--new`, `--filter-*`, `--wf-*`, `--hostlist*` запрещены: это
-  зона генератора.
-- После изменения нажмите «Обновить presets» в настройках или перезапустите
-  приложение.
-
----
-
-## Диагностика и автоподбор
-
-Кнопка **«Тест»** выполняет три прямых HTTPS-запроса параллельно:
+Кнопка с графиком выполняет три прямых HTTPS-запроса параллельно:
 
 - YouTube: `https://www.youtube.com/generate_204`
 - Discord: `https://discord.com/api/v10/gateway`
 - Cloudflare: `https://www.cloudflare.com/cdn-cgi/trace`
 
-Таймаут каждого запроса — 3 секунды. Системный прокси намеренно не
-используется, чтобы проверять именно текущий маршрут с WinDivert.
+Таймаут — 3 секунды. Системный прокси не используется. Зелёный статус означает,
+что TLS-соединение и HTTP-ответ получены, а не гарантию работы всех функций
+сервиса.
 
-Кнопка **«Подбор»** последовательно запускает все пресеты, ждёт инициализацию
-winws, проверяет три сервиса и выбирает стратегию с максимальной доступностью и
-минимальной задержкой. Это занимает около 30 секунд и на время проверки
-перезапускает обход. Если ни одна стратегия не дала доступ, приложение
-останавливает winws и возвращает исходный пресет.
+## Приватность и безопасность
 
-Зелёный статус означает, что TLS-соединение и HTTP-ответ получены. Это быстрый
-индикатор, а не гарантия, что все функции сервиса работают: DPI может
-блокировать отдельные CDN, API или голосовые порты.
+- Нет рекламы, аккаунтов, аналитики, автообновлений и загрузки кода.
+- Нет глобального счётчика пользователей: это была бы телеметрия. Статистика
+  хранится в `usage.json` локально.
+- Сетевые запросы делает только диагностика — после нажатия кнопки.
+- Движок запускает только WinDivert; сторонние процессы не запускаются.
+- Аргументы профилей валидируются, произвольные команды запрещены.
+- CSP запрещает внешние скрипты, стили, картинки и `fetch` из UI.
+- Релизы сопровождаются SHA-256; проверяйте `SHA256SUMS.txt`.
+- WinDivert и PyDivert — сторонние компоненты с лицензиями LGPL/GPL. Полные
+  тексты и ссылки на исходники: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt),
+  [licenses/](licenses/).
+- Сборка не подписана сертификатом Authenticode. SmartScreen может
+  предупредить. Это не делает приложение «взломанным»; проверяйте хэш.
 
----
+Подробная модель угроз — в [SECURITY.md](SECURITY.md). Инструкция по подписи —
+в [docs/SIGNING.md](docs/SIGNING.md).
 
-## Локальная статистика
+## Ограничения
 
-В настройках отображаются:
+- **Не 100% на всех провайдерах.** ТСПУ меняются, часть блокировок делается по IP
+  и протоколам, а не по SNI.
+- **Не VPN.** Приложение не меняет IP и не шифрует трафик.
+- **Не для голоса Discord и игр по UDP.** Движок оптимизирован для TCP-сайтов и
+  приложений; UDP 443 блокируется для перехода на TCP. Голосовые UDP-порты
+  остаются без изменений.
+- **ECH.** Если сайт использует Encrypted ClientHello, SNI скрыт и разрез по
+  имени невозможен; может помочь только режим «Все программы» с разрезом по
+  фиксированному смещению.
+- **Драйвер WinDivert** должен быть загружен. На некоторых ПК с политиками
+  безопасности драйвер может блокироваться антивирусом.
+- **Локальный администратор** может исследовать любое неподписанное приложение.
+  Nuitka — не DRM.
 
-- количество запусков лаунчера;
-- количество сессий обхода;
-- суммарное время в обходе;
-- суммарное время в лаунчере;
-- время текущей сессии в нижней status line.
-
-Счётчики хранятся в `usage.json` рядом с настройками. **Они никогда не
-отправляются в интернет.** Глобального «онлайн-счётчика пользователей» здесь
-нет: для него потребовался бы сервер и сбор персональных запросов, что
-противоречит принципам проекта. Публичная статистика скачиваний доступна
-средствами GitHub Releases после публикации репозитория.
-
----
-
-## Трей, закрытие и автозапуск
-
-- Кнопка закрытия окна по умолчанию сворачивает приложение в трей.
-- В меню трея доступны запуск/остановка, проверка доступа и выход.
-- Автозапуск создаёт задачу планировщика **Zapret RU Launcher**:
-  `ONLOGON`, `HIGHEST`, команда с флагом `--autostart`.
-- При автозапуске лаунчер открывается свёрнутым в трей. Обход **не включается
-  автоматически**: запустите его из окна или меню трея. Это осознанное решение,
-  чтобы WinDivert не начинал перехват без явной команды.
-
-Удалить задачу вручную:
-
-```cmd
-schtasks /Delete /TN "Zapret RU Launcher" /F
-```
-
-Если перенести exe в другую папку, выключите и включите автозапуск заново,
-чтобы обновить путь в задаче.
-
----
-
-## Сборка в один exe
-
-Зависимости уже перечислены в `requirements.txt`; для воспроизводимой сборки
-можно использовать зафиксированные версии из `requirements.lock`. Сборка —
-нативно в машинный код через Nuitka:
+## Разработка и сборка
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.lock
+python main.py
+```
+
+Сборка одного exe:
+
+```powershell
 build.bat
 ```
 
 Результат: `dist\ZapretRU.exe` и `dist\SHA256SUMS.txt`.
 
-Ключевые параметры сборки:
+Ключевые параметры `build.bat`:
 
-- `--onefile` — один exe.
-- `--windows-console-mode=disable` — без консольного окна.
-- `--windows-uac-admin` — манифест запрашивает администратора.
-- `--python-flag=no_docstrings,no_asserts` — меньше служебных строк и
-  отладочных проверок в native-сборке.
-- `--include-data-dir=ui=ui`, `lists`, `assets` — ресурсы внутри exe.
-- `--include-data-files=presets.json=presets.json`.
-- `--include-package-data=webview`, `pythonnet`, `clr_loader` и явный
-  `WebView2Loader.dll` — для корректного WebView2 и .NET.
-- `--windows-icon-from-ico=assets/icon.ico`.
+- `--onefile`, `--windows-console-mode=disable`, `--windows-uac-admin`;
+- `--include-package-data=pydivert` и явные `WinDivert64.dll` / `WinDivert64.sys`;
+- `--python-flag=no_docstrings,no_asserts`;
+- `--windows-icon-from-ico=assets/icon.ico`;
+- SHA-256 после успешной сборки.
 
-`tools/build_prepare.py` проверяет окружение, складывает WebView2Loader.dll в
-`build_artifacts` и после успешной сборки пишет SHA-256 контрольную сумму.
+`tools/build_prepare.py` проверяет окружение, складывает WebView2Loader и
+драйвер WinDivert в `build_artifacts` и пишет контрольную сумму.
 
-### Что важно знать о сборке
-
-- Nuitka компилирует Python в нативный код. Это не «шифрование» и не DRM:
-  интерфейс и стратегии остаются прозрачными и редактируемыми. Абсолютной
-  защиты от reverse engineering не существует; безопасность проекта строится на
-  открытом коде, проверяемых релизах и SHA-256, а не на «антихакерских» трюках.
-- Nuitka/pywebview — динамично развивающиеся пакеты. В `build.bat` уже добавлены
-  явные WebView2 DLL и package data. Если после обновления pywebview появляется
-  ошибка WebView2Loader, обновите Nuitka и пересоберите проект.
-- Антивирусы и SmartScreen могут реагировать на WinDivert и упакованный
-  onefile. Это типично для драйверов перехвата; подписанного сертификата у
-  проекта нет.
-- `bin` **не** вшивается в exe. `build.bat` копирует папку `bin` рядом с
-  `dist\ZapretRU.exe`, если она есть в проекте. winws требует соседние DLL,
-  поэтому так проще обновлять движок.
-
----
-
-## Где хранятся данные
-
-### Из исходников
-
-- `lists/list-general.txt`
-- `lists/list-exclude.txt`
-- `presets.json`
-- настройки: `settings.json` в корне проекта (создаётся при изменении)
-- локальная статистика: `usage.json`
-
-### В собранном onefile
-
-- Ресурсы `ui`, `lists`, `presets.json` распаковываются Nuitka во временную
-  папку.
-- Редактируемая копия списков и `presets.json` создаётся в
-  `%LOCALAPPDATA%\ZapretRU\`.
-- Настройки, `usage.json` и `launcher.log` — там же.
-- `bin` лежит рядом с `ZapretRU.exe` и используется напрямую.
-
-Папку данных можно открыть из «Настройки → Данные».
-
----
-
-## Ограничения
-
-Zapret RU — не VPN и не прокси. Он не поможет, если:
-
-- блокировка сделана по IP-адресу, а не по SNI/Host;
-- провайдер подменяет DNS (настройте DoH/DoT или другой DNS);
-- трафик проходит через полноценный реконструирующий прокси;
-- блокируется протокол VPN/QUIC целиком на уровне маршрута;
-- применяется активный DPI, который режет все варианты desync.
-
-Стратегии не универсальны и могут требовать подбора. Оригинальный
-`blockcheck\blockcheck.cmd` из zapret помогает найти рабочий набор параметров
-для конкретного провайдера.
-
-Не запускайте второй `winws.exe` параллельно: приложение обнаруживает чужой
-процесс и просит остановить его, чтобы фильтры WinDivert не конфликтовали.
-
----
-
-## Тесты и разработка
+### Тесты
 
 ```powershell
 python -m unittest discover -s tests -v
 node --check ui/app.js
 ```
 
-Сейчас 27 unit-тестов: сборка команд, режимы «список/всё», Game Filter,
-валидация `presets.json`, настройки, сохранение списков, usage-статистика,
-жизненный цикл тестового процесса и диагностика.
+36 unit-тестов: TLS/HTTP-парсер, SNI-split, доменные политики, профили,
+настройки, миграция старых `presets.json`, сохранение списков, usage-статистика
+и сервисный слой. `tests/ui_preview.html` — dev-стенд интерфейса с mock API.
 
-`tests/ui_preview.html` — необязательный dev-стенд интерфейса с mock API. В нём
-можно проверить главную, списки, логи, настройки и автоподбор без реального
-winws. Он не входит в сборку.
-
----
-
-## Структура проекта
+### Структура
 
 ```text
-main.py                 точка входа, UAC, окно, трей
+main.py                 точка входа, UAC, окно, трей, скрытый engine-smoke
 core/
-  manager.py            запуск/остановка winws, логи, taskkill, atexit
-  presets.py            загрузка presets.json и генерация аргументов
-  checker.py            параллельная HTTPS-диагностика
+  engine.py             собственный WinDivert-движок и TLS/HTTP-парсер
   application.py        сервисный слой для UI и трея
-  environment.py        проверка bin, списков и сторонних winws
+  environment.py        проверка драйвера, прав и списков
+  presets.py            профили из presets.json
   settings.py           валидация и атомарное сохранение настроек
   usage.py              локальная статистика без сети
   autostart.py          schtasks
   tray.py               pystray + Pillow
   winutils.py           UAC, буфер обмена, проводник
 ui/
-  index.html            разметка и SVG-иконки
-  style.css             терминальная тёмная тема, Inter + mono
-  app.js                состояние UI, API-мост, логи, диагностика, автоподбор
-  fonts/                Inter (OFL) локально, без Google Fonts в рантайме
-bin/                    winws.exe, WinDivert, cygwin1.dll, .bin
+  index.html            большое окно, SVG-иконки
+  style.css             тёмная iOS-тема, скругления, анимации
+  app.js                состояние, API-мост, логи, диагностика, автоподбор
+  fonts/                Inter (OFL) локально
 lists/                  list-general.txt, list-exclude.txt
-presets.json            стратегии
-assets/                 иконки приложения
-docs/                   скриншоты, social preview, release notes
-tools/                  подготовка сборки и публикации
-.github/                CI, release workflow, issue templates, security setup
-build.bat               сборка Nuitka + SHA-256
+presets.json            профили движка
+tools/                  build_prepare, engine_smoke, core_smoke, publish_github
+.github/                CI, release, CodeQL, Dependabot, issue templates
 tests/                  unit-тесты и dev preview
-SECURITY.md             модель угроз и порядок сообщения об уязвимостях
-CONTRIBUTING.md         правила разработки
 ```
-
----
-
-## Безопасность и приватность
-
-- Приложение не содержит сетевого клиента, кроме трёх диагностических
-  HTTPS-запросов, которые выполняются только по нажатию кнопки.
-- Нет рекламы, аналитики, автообновлений и загрузки стратегий из интернета.
-- Вся статистика использования локальная; данные не покидают ПК.
-- Все команды winws видны в логах и в блоке «Команда запуска».
-- Никаких скрытых процессов: запускается только один `winws.exe`, PID которого
-  известен менеджеру. Завершение выполняется по этому PID, а не по имени образа.
-- Открытие ссылок разрешено только на официальные страницы zapret/WebView2.
-- Аргументы пресетов валидируются; запуск процессов происходит без shell.
-- CSP в HTML запрещает загрузку внешних скриптов, стилей, картинок и сетевые
-  `fetch` из UI. Локальный `'unsafe-eval'` разрешён только потому, что его
-  требует JS-мост PyWebView; удалённого кода в интерфейсе нет.
-- Ограничение честное: локальный администратор может исследовать и изменить
-  любой неподписанный клиент. Абсолютной защиты от reverse engineering не
-  существует. Подробнее — в [SECURITY.md](SECURITY.md) и [docs/SIGNING.md](docs/SIGNING.md).
-
----
 
 ## Репозиторий и релизы
 
 - Репозиторий: <https://github.com/GARAKIL/zapret-ru>
+- Лендинг: <https://garakil.github.io/zapret-ru/>
 - Релизы: <https://github.com/GARAKIL/zapret-ru/releases>
-- Текущий релиз: **v1.1.0** с `ZapretRU.exe` и `SHA256SUMS.txt`.
-
-В проекте настроены:
-
-- `.github/workflows/ci.yml` — тесты на каждый push/PR;
-- `.github/workflows/release.yml` — сборка onefile по тегу `v*` и публикация
-  `ZapretRU.exe` + `SHA256SUMS.txt` в GitHub Releases;
-- `.github/workflows/codeql.yml` — статический анализ Python и JS;
-- `.github/dependabot.yml` — контроль обновлений зависимостей;
-- `SECURITY.md`, `CONTRIBUTING.md`, шаблоны issue/PR;
-- `.github/REPO_SETUP.md` — рекомендованное описание и GitHub Topics:
-  `zapret`, `dpi-bypass`, `anti-censorship`, `windows`, `russia`, `tspu`,
-  `youtube`, `discord`, `quic`, `windivert`, `pywebview`, `nuitka`, `desync`,
-  `network`, `gui`;
-- `tools/publish_github.ps1` — создание публичного репозитория, topic-тегов,
-  отправка кода и тега после `gh auth login`.
+- CI: <https://github.com/GARAKIL/zapret-ru/actions>
+- Текущая версия: **1.2.0**.
+- Темы GitHub: `zapret`, `dpi-bypass`, `anti-censorship`, `windows`, `russia`,
+  `tspu`, `youtube`, `discord`, `quic`, `windivert`, `pywebview`, `nuitka`,
+  `desync`, `network`, `gui`.
 
 Перед запуском exe из Release проверяйте SHA-256:
 
@@ -513,41 +243,21 @@ Get-FileHash .\ZapretRU.exe -Algorithm SHA256
 Get-Content .\SHA256SUMS.txt
 ```
 
-Бинарники zapret намеренно не хранятся в репозитории и не вшиваются в exe.
+## Лицензии
+
+- Код Zapret RU — MIT, см. [LICENSE](LICENSE).
+- WinDivert — LGPL-3.0 / GPL-2.0, см. [licenses/WinDivert-LICENSE.txt](licenses/WinDivert-LICENSE.txt).
+- PyDivert — LGPL-3.0-or-later / GPL-2.0-or-later, см. [licenses/LGPL-3.0.txt](licenses/LGPL-3.0.txt).
+- Inter — SIL Open Font License 1.1, см. `ui/fonts/Inter-LICENSE.txt`.
+- Остальные Python-пакеты сохраняют свои лицензии.
+
+## Поддержать проект
+
+Поставьте звезду и расскажите о Zapret RU. Это помогает проекту находиться
+другими пользователями. Реклама, платные подписки и телеметрия не появятся.
 
 ---
-
-## Лицензии и благодарности
-
-- **zapret** — [bol-van/zapret](https://github.com/bol-van/zapret). Оригинальный
-  проект и его бинарники распространяются отдельно под лицензией zapret.
-- **zapret-win-bundle** — официальная Windows-сборка:
-  [bol-van/zapret-win-bundle](https://github.com/bol-van/zapret-win-bundle).
-- **PyWebView**, **pystray**, **Pillow**, **pythonnet**, **Nuitka** — их
-  авторам и сообществам.
-- **Inter** — Rasmus Andersson, SIL Open Font License 1.1.
-  См. `ui/fonts/Inter-LICENSE.txt`.
-
-Код лаунчера — MIT, см. `LICENSE`.
-
-Если проект помог, поставьте звезду и расскажите о нём. Это помогает найти
-проект другим пользователям. Реклама, платные подписки и телеметрия в проекте
-не появятся.
-
----
-
-## Правовая оговорка
-
-Используйте инструмент ответственно и в рамках применимого законодательства.
-Обход DPI может нарушать условия оказания услуг провайдера. Авторы не несут
-ответственности за блокировки, потерю доступа или иные последствия применения
-сторонних бинарников zapret.
-
----
-
-## Ключевые слова
 
 `zapret для Windows` · `обход блокировок YouTube` · `Discord` · `QUIC` ·
-`ТСПУ` · `DPI bypass` · `anti-censorship` · `WinDivert` · `winws` ·
-`zapret YouTube` · `zapret Discord` · `desync` · `Windows 10/11` · `open source` ·
-`без рекламы` · `без телеметрии`.
+`ТСПУ` · `DPI bypass` · `anti-censorship` · `WinDivert` · `SNI split` ·
+`desync` · `Windows 10/11` · `open source` · `без рекламы` · `без телеметрии`.

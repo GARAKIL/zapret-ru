@@ -22,11 +22,10 @@ SOFTWARE.
 
 ---
 
-Zapret RU itself does not include original zapret binaries. winws.exe,
-WinDivert, cygwin1.dll and .bin payloads are distributed separately by the
-upstream zapret project and are covered by their own licenses. See:
-https://github.com/bol-van/zapret
-https://github.com/bol-van/zapret-win-bundle
+Zapret RU does not include winws.exe, cygwin1.dll, zapret .bin payloads or
+other zapret binaries. The executable bundles the official WinDivert driver and
+the PyDivert binding, which are third-party components under LGPL/GPL. See
+THIRD_PARTY_NOTICES.txt and licenses/ for the full notices and source links.
 
 The bundled Inter font is licensed under the SIL Open Font License 1.1.
 See ui/fonts/Inter-LICENSE.txt.

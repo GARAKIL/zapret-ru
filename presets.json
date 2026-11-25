@@ -1,256 +1,56 @@
 {
-  "schema_version": 1,
-  "updated": "2026-11-25",
-  "defaults": {
-    "tcp_ports": "80,443",
-    "udp_ports": "443,19294-19344,50000-65535",
-    "discord_udp_ports": "19294-19344,50000-65535",
-    "game_tcp_ports": "1024-65535",
-    "game_udp_ports": "1024-65535"
-  },
+  "schema_version": 2,
+  "updated": "2026-11-26",
   "presets": [
     {
-      "id": "general",
-      "name": "General",
-      "label": "Универсальный",
+      "id": "smart",
+      "name": "Умный",
+      "label": "SNI Split · QUIC → TCP",
       "badge": "Рекомендуется",
-      "description": "Fake + multisplit с fooling=ts. Сбалансированная стратегия для большинства домашних провайдеров: TLS/HTTP, QUIC и голосовой UDP Discord.",
+      "description": "Разрезает TLS ClientHello внутри имени сайта и отключает QUIC, чтобы браузеры и приложения шли по TCP. Лучший старт для большинства сайтов и программ.",
       "caution": null,
-      "quic": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-quic=@BIN/quic_initial_www_google_com.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "discord": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=6",
-        "--dpi-desync-fake-discord=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-fake-stun=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "tcp": [
-        "--dpi-desync=fake,multisplit",
-        "--dpi-desync-split-seqovl=681",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-fooling=ts",
-        "--dpi-desync-repeats=6",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-split-seqovl-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_tcp": [
-        "--dpi-desync=fake,multisplit",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-split-seqovl=664",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-fooling=ts",
-        "--dpi-desync-repeats=6",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-split-seqovl-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_udp": [
-        "--dpi-desync=fake",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-unknown-udp=@BIN/ACTIVE_GAME_UDP.bin"
-      ]
+      "split": "sni",
+      "block_quic": true
     },
     {
-      "id": "alt1",
-      "name": "ALT 1",
-      "label": "Badseq / Autottl",
-      "badge": "AUTOTTL",
-      "description": "Fake + fakedsplit с автоматическим TTL и fooling=badseq. Помогает там, где TTL-фейки не доходят до DPI, а обычный fake + multisplit не срабатывает.",
+      "id": "split1",
+      "name": "Быстрый",
+      "label": "Split 1 · QUIC → TCP",
+      "badge": "Лёгкий",
+      "description": "Делит первый пакет на 1 байт. Минимальное вмешательство, помогает там, где DPI смотрит только начало TLS-записи.",
       "caution": null,
-      "quic": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-quic=@BIN/quic_initial_www_google_com.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "discord": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-discord=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-fake-stun=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "tcp": [
-        "--dpi-desync=fake,fakedsplit",
-        "--dpi-desync-autottl=2",
-        "--dpi-desync-fooling=badseq",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fakedsplit-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_tcp": [
-        "--dpi-desync=fake,fakedsplit",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-autottl=2",
-        "--dpi-desync-fooling=badseq",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fakedsplit-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_udp": [
-        "--dpi-desync=fake",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-unknown-udp=@BIN/ACTIVE_GAME_UDP.bin"
-      ]
+      "split": 1,
+      "block_quic": true
     },
     {
-      "id": "alt2",
-      "name": "ALT 2",
-      "label": "Split2 / MD5Sig",
-      "badge": "MD5SIG",
-      "description": "Fake + split2 с TCP-опцией MD5 signature. Работает на части DPI, которые пропускают пакеты с нестандартной TCP-опцией, но игнорируют обычный split.",
-      "caution": "MD5 signature увеличивает TCP-заголовок. На редких провайдерах это может переполнить MTU; при обрывах соединений попробуйте ALT 4.",
-      "quic": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-quic=@BIN/quic_initial_www_google_com.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "discord": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=8",
-        "--dpi-desync-fake-discord=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-fake-stun=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "tcp": [
-        "--dpi-desync=fake,split2",
-        "--dpi-desync-split-pos=2",
-        "--dpi-desync-fooling=md5sig",
-        "--dpi-desync-repeats=6",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_tcp": [
-        "--dpi-desync=fake,split2",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-split-pos=2",
-        "--dpi-desync-fooling=md5sig",
-        "--dpi-desync-repeats=6",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_udp": [
-        "--dpi-desync=fake",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-unknown-udp=@BIN/ACTIVE_GAME_UDP.bin"
-      ]
-    },
-    {
-      "id": "alt3",
-      "name": "ALT 3",
-      "label": "Syndata / Агрессивный",
-      "badge": "MTS / MOBILE",
-      "description": "Syndata + fake + multisplit с badseq/autottl и повышенным числом повторов. Крайняя мера для сложных провайдеров и мобильного интернета, где не работают обычные desync-стратегии.",
-      "caution": "Syndata работает на этапе SYN и не может учитывать SNI-исключения. Используйте как крайнюю меру и после запуска проверьте банковские и государственные сайты.",
-      "quic": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=12",
-        "--dpi-desync-fake-quic=@BIN/quic_initial_www_google_com.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "discord": [
-        "--dpi-desync=fake",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-discord=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-fake-stun=@BIN/ACTIVE_DISCORD_UDP.bin",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "tcp": [
-        "--dpi-desync=syndata,fake,multisplit",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=d4",
-        "--dpi-desync-autottl=2",
-        "--dpi-desync-fooling=badseq",
-        "--dpi-desync-split-seqovl=652",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-split-seqovl-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_tcp": [
-        "--dpi-desync=syndata,fake,multisplit",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-autottl=2",
-        "--dpi-desync-fooling=badseq",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-repeats=10",
-        "--dpi-desync-fake-tls=@BIN/tls_clienthello_www_google_com.bin",
-        "--dpi-desync-fake-http=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_udp": [
-        "--dpi-desync=fake",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-repeats=12",
-        "--dpi-desync-fake-unknown-udp=@BIN/ACTIVE_GAME_UDP.bin"
-      ]
-    },
-    {
-      "id": "alt4",
-      "name": "ALT 4",
-      "label": "Без Fake / Только Split",
-      "badge": "NO FAKE",
-      "description": "Только сегментация и overlap без фейковых TCP-пакетов. Для провайдеров, которые жёстко отбрасывают fake, но пропускают изменённые последовательности. QUIC и UDP обрабатываются udplen.",
+      "id": "split2",
+      "name": "Ровный",
+      "label": "Split 2 · QUIC → TCP",
+      "badge": "Баланс",
+      "description": "Делит первый пакет на 2 байта. Хороший компромисс для провайдеров, которые не принимают Split 1.",
       "caution": null,
-      "quic": [
-        "--dpi-desync=udplen",
-        "--dpi-desync-udplen-increment=10",
-        "--dpi-desync-udplen-pattern=0xDEADBEEF",
-        "--dpi-desync-cutoff=n3"
-      ],
-      "discord": [
-        "--dpi-desync=udplen",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-udplen-increment=6",
-        "--dpi-desync-cutoff=n4"
-      ],
-      "tcp": [
-        "--dpi-desync=multisplit",
-        "--dpi-desync-split-seqovl=681",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-split-seqovl-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_tcp": [
-        "--dpi-desync=multisplit",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-split-seqovl=681",
-        "--dpi-desync-split-pos=1",
-        "--dpi-desync-split-seqovl-pattern=@BIN/tls_clienthello_www_google_com.bin"
-      ],
-      "game_udp": [
-        "--dpi-desync=udplen",
-        "--dpi-desync-any-protocol=1",
-        "--dpi-desync-cutoff=n4",
-        "--dpi-desync-udplen-increment=10",
-        "--dpi-desync-udplen-pattern=0xDEADBEEF"
-      ]
+      "split": 2,
+      "block_quic": true
+    },
+    {
+      "id": "split4",
+      "name": "Глубокий",
+      "label": "Split 4 · QUIC → TCP",
+      "badge": "Сложные сети",
+      "description": "Делит первый пакет на 4 байта. Помогает на мобильном интернете и в сетях с более глубокой проверкой TLS.",
+      "caution": "Некоторые приложения с обязательным QUIC могут работать медленнее: они будут вынуждены перейти на TCP.",
+      "split": 4,
+      "block_quic": true
+    },
+    {
+      "id": "tcp_only",
+      "name": "Без QUIC-фильтра",
+      "label": "SNI Split · QUIC разрешён",
+      "badge": "Для приложений",
+      "description": "Тот же SNI Split, но UDP 443 не блокируется. Выберите, если приложение принципиально использует QUIC и не умеет переходить на TCP.",
+      "caution": "Если провайдер блокирует QUIC, сайты в этом режиме могут не открываться.",
+      "split": "sni",
+      "block_quic": false
     }
   ]
 }

@@ -44,7 +44,7 @@ def main() -> None:
         fail(
             "pywebview не установлен. Выполните: python -m pip install -r requirements.txt"
         )
-    for module in ("nuitka", "pystray", "PIL"):
+    for module in ("nuitka", "pystray", "PIL", "pydivert"):
         try:
             __import__(module)
         except ImportError:
@@ -63,10 +63,19 @@ def main() -> None:
     if not source.is_file():
         fail(f"WebView2Loader.dll не найден: {source}")
 
+    from pydivert import windivert_dll
+
+    driver_dir = Path(windivert_dll.__file__).resolve().parent
     STAGE.mkdir(parents=True, exist_ok=True)
     target = STAGE / "WebView2Loader.dll"
     shutil.copy2(source, target)
     print(f"[OK] WebView2Loader: {source}")
+    for name in ("WinDivert64.dll", "WinDivert64.sys"):
+        driver = driver_dir / name
+        if not driver.is_file() or driver.stat().st_size <= 0:
+            fail(f"Встроенный драйвер не найден: {driver}")
+        shutil.copy2(driver, STAGE / name)
+        print(f"[OK] Driver: {driver}")
     print(f"[OK] Stage: {target}")
 
 

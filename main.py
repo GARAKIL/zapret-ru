@@ -1,21 +1,23 @@
-"""Zapret RU launcher entry point.
+"""Zapret RU entry point.
 
-The application is intentionally a thin, auditable wrapper around the original
-bol-van/zapret winws.exe. No remote code is downloaded, no child process is
-started without visibility, and every winws argument is generated from
-presets.json and shown in the UI.
+The application contains its own WinDivert-based DPI evasion engine. It does
+not start winws.exe or download code at runtime. Packet policy comes from
+presets.json and is shown in the UI.
 """
 
 from __future__ import annotations
 
 import argparse
 import ctypes
+import json
 import logging
 import logging.handlers
 import os
 import subprocess
 import sys
+import tempfile
 import threading
+import time
 import traceback
 import webbrowser
 from pathlib import Path
@@ -51,6 +53,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--debug",
         action="store_true",
         help="Открыть инструменты разработчика WebView2 (debug-режим)",
+    )
+    parser.add_argument(
+        "--engine-smoke",
+        action="store_true",
+        help=argparse.SUPPRESS,
     )
     return parser.parse_args(argv)
 
@@ -227,6 +234,9 @@ class LauncherApi:
     def window_minimize(self) -> dict[str, Any]:
         return self._app.minimize_window()
 
+    def window_toggle_maximize(self) -> dict[str, Any]:
+        return self._app.toggle_maximize()
+
     def window_close(self) -> dict[str, Any]:
         return self._app.close_window_from_ui()
 
@@ -237,15 +247,16 @@ class LauncherApi:
     # ---------------------------------------------------------------- desktop
     def open_folder(self, kind: str) -> dict[str, Any]:
         allowed = {
-            "bin": self._core.paths.bin_dir,
             "data": self._core.paths.data_dir,
+            "engine": self._core.paths.data_dir,
+            "bin": self._core.paths.data_dir,
             "lists": self._core.paths.lists_dir,
             "presets": self._core.paths.presets_file,
         }
         target = allowed.get(kind)
         if target is None:
             return {"ok": False, "error": "Неизвестный раздел"}
-        if kind == "bin":
+        if kind in ("data", "engine", "bin"):
             try:
                 target.mkdir(parents=True, exist_ok=True)
             except OSError as exc:
@@ -267,6 +278,9 @@ class LauncherApi:
 
     def open_link(self, key: str) -> dict[str, Any]:
         links = {
+            "github": "https://github.com/GARAKIL/zapret-ru",
+            "releases": "https://github.com/GARAKIL/zapret-ru/releases",
+            "driver": "https://github.com/basil00/WinDivert",
             "zapret": "https://github.com/bol-van/zapret",
             "bundle": "https://github.com/bol-van/zapret-win-bundle",
             "webview2": "https://developer.microsoft.com/microsoft-edge/webview2/",
@@ -290,6 +304,7 @@ class LauncherApplication:
         self._closing_lock = threading.RLock()
         self._quitting = False
         self._allow_close = False
+        self._maximized = False
         self.tray = TrayController(
             core=core,
             assets_dir=paths.assets_dir,
@@ -308,10 +323,10 @@ class LauncherApplication:
             f"{APP_NAME} {APP_VERSION}",
             url=self.paths.ui_index.as_uri(),
             js_api=self.api,
-            width=440,
-            height=620,
-            min_size=(440, 620),
-            resizable=False,
+            width=1120,
+            height=800,
+            min_size=(960, 680),
+            resizable=True,
             fullscreen=False,
             frameless=True,
             easy_drag=False,
@@ -320,7 +335,7 @@ class LauncherApplication:
             minimized=False,
             on_top=False,
             confirm_close=False,
-            background_color="#121212",
+            background_color="#07080d",
             transparent=False,
             text_select=True,
             zoomable=False,
@@ -378,6 +393,20 @@ class LauncherApplication:
         try:
             self.window.minimize()
             return {"ok": True}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+    def toggle_maximize(self) -> dict[str, Any]:
+        if self.window is None:
+            return {"ok": False, "error": "Окно ещё не готово"}
+        try:
+            if self._maximized:
+                self.window.restore()
+                self._maximized = False
+            else:
+                self.window.maximize()
+                self._maximized = True
+            return {"ok": True, "maximized": self._maximized}
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
 
@@ -460,6 +489,41 @@ class LauncherApplication:
                 log.info("Application stopped")
 
 
+def _run_engine_smoke(paths: AppPaths) -> int:
+    """Hidden diagnostic used to validate a compiled onefile build."""
+    output = Path(tempfile.gettempdir()) / "zapretru-engine-smoke.json"
+    core: ApplicationCore | None = None
+    try:
+        core = ApplicationCore(paths)
+        start = core.start_bypass("smart", "global", False)
+        time.sleep(2.0)
+        check = core.check_connectivity()
+        payload = {
+            "ok": bool(start.get("ok")) and bool(check.get("reachable")),
+            "start": start,
+            "check": check,
+            "status": core.get_status(),
+        }
+        output.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        return 0 if payload["ok"] else 1
+    except Exception as exc:
+        output.write_text(
+            json.dumps(
+                {"ok": False, "error": str(exc), "traceback": traceback.format_exc()},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        return 1
+    finally:
+        if core is not None:
+            core.shutdown()
+
+
 def _show_startup_error(message: str, details: str = "") -> None:
     text = message
     if details:
@@ -488,6 +552,9 @@ def main(argv: list[str] | None = None) -> int:
                 "Zapret RU уже запущен.\n\nОткройте приложение из области уведомлений.",
             )
         return 0
+
+    if args.engine_smoke:
+        return _run_engine_smoke(paths)
 
     if not paths.ui_index.is_file():
         _show_startup_error(

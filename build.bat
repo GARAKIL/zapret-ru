@@ -31,9 +31,13 @@ if not exist "assets\icon.ico" (
     goto :error
 )
 
-if not exist "bin\winws.exe" (
-    echo [WARN] bin\winws.exe was not found.
-    echo [WARN] The exe can still be built, but zapret files must be copied to bin.
+if not exist "build_artifacts\WinDivert64.dll" (
+    echo [ERROR] WinDivert64.dll was not staged.
+    goto :error
+)
+if not exist "build_artifacts\WinDivert64.sys" (
+    echo [ERROR] WinDivert64.sys was not staged.
+    goto :error
 )
 
 echo [BUILD] Compiling Python to a native executable...
@@ -46,11 +50,11 @@ python -m nuitka ^
     --python-flag=no_docstrings,no_asserts ^
     --windows-icon-from-ico=assets\icon.ico ^
     --product-name="Zapret RU" ^
-    --file-version=1.1.0.0 ^
-    --product-version=1.1.0.0 ^
+    --file-version=1.2.0.0 ^
+    --product-version=1.2.0.0 ^
     --company-name="Zapret RU" ^
-    --file-description="Zapret RU Launcher" ^
-    --copyright="Local launcher. zapret components by bol-van, separate license." ^
+    --file-description="Zapret RU" ^
+    --copyright="Built-in WinDivert engine. WinDivert/PyDivert are LGPL/GPL third-party components." ^
     --output-dir=dist ^
     --output-filename=ZapretRU.exe ^
     --remove-output ^
@@ -62,7 +66,10 @@ python -m nuitka ^
     --include-package-data=webview ^
     --include-package-data=pythonnet ^
     --include-package-data=clr_loader ^
+    --include-package-data=pydivert ^
     --include-data-files="%WEBVIEW2_LOADER%=WebView2Loader.dll" ^
+    --include-data-files="build_artifacts\WinDivert64.dll=pydivert/windivert_dll/WinDivert64.dll" ^
+    --include-data-files="build_artifacts\WinDivert64.sys=pydivert/windivert_dll/WinDivert64.sys" ^
     main.py
 
 if errorlevel 1 (
@@ -77,10 +84,13 @@ if not exist "dist\ZapretRU.exe" (
 )
 
 if exist "dist\bin" rmdir /s /q "dist\bin"
-if exist "bin" xcopy "bin" "dist\bin" /E /I /Y >nul
 if exist "README.md" copy /Y "README.md" "dist\README.md" >nul
 if exist "LICENSE" copy /Y "LICENSE" "dist\LICENSE.txt" >nul
+if exist "THIRD_PARTY_NOTICES.txt" copy /Y "THIRD_PARTY_NOTICES.txt" "dist\THIRD_PARTY_NOTICES.txt" >nul
 if exist "ui\fonts\Inter-LICENSE.txt" copy /Y "ui\fonts\Inter-LICENSE.txt" "dist\INTER-LICENSE.txt" >nul
+if exist "licenses" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path 'licenses\*' -DestinationPath 'dist\THIRD_PARTY_LICENSES.zip' -Force" >nul
+)
 python tools\build_prepare.py checksums
 if errorlevel 1 (
     echo [ERROR] Failed to write SHA256SUMS.txt.
@@ -93,9 +103,8 @@ echo ============================================================
 echo   Build complete.
 echo   Executable: dist\ZapretRU.exe
 echo.
-echo   The bin folder next to the exe must contain winws.exe,
-echo   WinDivert and .bin payloads. It is copied automatically
-echo   if bin existed in the project.
+echo   Engine: built-in WinDivert packet filter.
+echo   No external winws.exe or zapret binaries are required.
 echo.
 echo   Editable data is stored in:
 echo   %%LOCALAPPDATA%%\ZapretRU

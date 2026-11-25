@@ -7,11 +7,11 @@ param(
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path -Parent $PSScriptRoot)
 
-$description = "Zapret RU - open-source Windows launcher for bol-van/zapret: YouTube, Discord and QUIC DPI bypass with presets, live logs, tray and auto-selection. No ads, no telemetry."
+$description = "Zapret RU - self-contained Windows DPI bypass with its own WinDivert engine: SNI split, QUIC to TCP, large iOS-style UI and auto-selection. No winws, no ads, no telemetry."
 $topics = @(
     "zapret", "dpi-bypass", "anti-censorship", "windows", "russia", "tspu",
-    "youtube", "discord", "quic", "windivert", "pywebview", "nuitka",
-    "desync", "network", "gui"
+    "youtube", "discord", "quic", "sni", "tls", "windivert", "pywebview",
+    "nuitka", "desync", "network", "gui"
 )
 
 foreach ($tool in @("git", "gh")) {
@@ -33,11 +33,11 @@ git add .
 if (git diff --cached --quiet) {
     Write-Host "[OK] Нет изменений для коммита."
 } else {
-    git commit -m "release: Zapret RU 1.1.0"
+    git commit -m "release: Zapret RU 1.2.0"
 }
 
-if (-not (git tag --list "v1.1.0")) {
-    git tag -a "v1.1.0" -m "Zapret RU 1.1.0"
+if (-not (git tag --list "v1.2.0")) {
+    git tag -a "v1.2.0" -m "Zapret RU 1.2.0"
 }
 
 $hasOrigin = (git remote 2>$null) -contains "origin"
@@ -65,5 +65,5 @@ Write-Host ""
 Write-Host "Репозиторий: https://github.com/$fullName"
 Write-Host "Тема: DPI bypass Windows"
 Write-Host "Теги: $($topics -join ', ')"
-Write-Host "Release workflow запустится после пуша тега v1.1.0."
+Write-Host "Release workflow запустится после пуша тега v1.2.0."
 Write-Host "Загрузите docs/social-preview.png в Settings -> Social preview."
