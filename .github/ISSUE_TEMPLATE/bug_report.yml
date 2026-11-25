@@ -1,0 +1,76 @@
+name: Bug report
+description: Сообщить о проблеме в Zapret RU
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Не прикладывайте пароли, токены и персональные данные.
+        Проверьте `launcher.log` и выберите последние строки лога winws.
+  - type: input
+    id: version
+    attributes:
+      label: Версия Zapret RU
+      placeholder: 1.1.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows и архитектура
+      placeholder: Windows 11 23H2 x64
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Провайдер / тип подключения
+      placeholder: Ростелеком, домашний Ethernet
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Режим
+      options:
+        - По списку
+        - Всё
+        - По списку + Game Filter
+        - Всё + Game Filter
+    validations:
+      required: true
+  - type: input
+    id: preset
+    attributes:
+      label: Пресет
+      placeholder: General / ALT 1 / ALT 2 / ALT 3 / ALT 4
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      placeholder: |
+        1. Скопировал bin из zapret ...
+        2. Запустил ...
+        3. Открыл ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи (без личных данных)
+      render: text
+      description: Вставьте последние строки вкладки «Логи» или launcher.log.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверки
+      options:
+        - label: Я проверил последнюю версию из Releases и контрольную сумму SHA-256
+          required: true
+        - label: Я использую официальный winws.exe / WinDivert из zapret bol-van
+          required: true
+        - label: В логах нет паролей, токенов и персональных данных
+          required: true

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none';">
+  <!-- 'unsafe-eval' is required by PyWebView's local js_api bridge. This page
+       loads no remote scripts, styles, images or network requests. -->
+  <link rel="icon" type="image/png" href="../assets/icon.png">
+  <title>Zapret RU</title>
+  <link rel="stylesheet" href="style.css?v=2.0.0">
+  <script src="app.js?v=2.0.2" defer></script>
+</head>
+<body>
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-logo" viewBox="0 0 32 32">
+      <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="#0A0F0D" stroke="#25372E"/>
+      <circle cx="7" cy="7" r="1.2" fill="#6CE8B1"/>
+      <circle cx="11" cy="7" r=".85" fill="#283C32"/>
+      <circle cx="14" cy="7" r=".85" fill="#283C32"/>
+      <path d="M10.4 12.2 16 16l-5.6 3.8" fill="none" stroke="#6CE8B1" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/>
+      <path d="M18.8 19.8h5.2" fill="none" stroke="#D9E6DE" stroke-width="2"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24">
+      <path d="m3.4 10.8 8.6-7 8.6 7"/>
+      <path d="M5.4 9.3V20h13.2V9.3"/>
+      <path d="M9.4 20v-5.7h5.2V20"/>
+    </symbol>
+    <symbol id="i-list" viewBox="0 0 24 24">
+      <path d="M8.5 6.5h12M8.5 12h12M8.5 17.5h12"/>
+      <path d="M3.5 6.5h.01M3.5 12h.01M3.5 17.5h.01"/>
+    </symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24">
+      <rect x="3" y="4.2" width="18" height="15.6" rx="3"/>
+      <path d="m7.5 9 3 3-3 3M13.5 15h3"/>
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <path d="M4 6.5h5.6M15.4 6.5H20M4 12h9.2M19 12h1M4 17.5h2.2M11.8 17.5H20"/>
+      <circle cx="12.5" cy="6.5" r="2.1"/>
+      <circle cx="16.1" cy="12" r="2.1"/>
+      <circle cx="9" cy="17.5" r="2.1"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24">
+      <path d="M8.2 5.7c0-.9 1-1.5 1.8-1l9 6.3c.7.5.7 1.5 0 2l-9 6.3c-.8.5-1.8-.1-1.8-1V5.7Z" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24">
+      <rect x="6.4" y="6.4" width="11.2" height="11.2" rx="2.2" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24">
+      <path d="M12 3.1 20 6v6.3c0 4-3.3 7.2-8 8.6-4.7-1.4-8-4.6-8-8.6V6l8-2.9Z"/>
+    </symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24">
+      <path d="M12 3.1 20 6v6.3c0 4-3.3 7.2-8 8.6-4.7-1.4-8-4.6-8-8.6V6l8-2.9Z"/>
+      <path d="m8.6 11.7 2.2 2.2 4.7-5"/>
+    </symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24">
+      <path d="m6.5 9.2 5.5 5.6 5.5-5.6"/>
+    </symbol>
+    <symbol id="i-gamepad" viewBox="0 0 24 24">
+      <path d="M7.2 8.2h9.6c2.8 0 4.8 2.4 4.2 5.1l-.7 3.1c-.5 2.2-3.3 2.8-4.6 1l-1.4-1.9H9.7l-1.4 1.9c-1.3 1.8-4.1 1.2-4.6-1l-.7-3.1c-.6-2.7 1.4-5.1 4.2-5.1Z"/>
+      <path d="M7.2 11.4v2.4M6 12.6h2.4M16.5 11.9h.01M18.3 14h.01"/>
+      <path d="M9.7 8.2 10.8 5h2.4l1.1 3.2"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.7"/>
+      <path d="M3.6 12h16.8M12 3.3c2.5 2.4 3.8 5.4 3.8 8.7S14.5 18.3 12 20.7C9.5 18.3 8.2 15.3 8.2 12S9.5 5.7 12 3.3Z"/>
+    </symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24">
+      <path d="m12 3.6 8.4 4.2L12 12 3.6 7.8 12 3.6Z"/>
+      <path d="m4.5 12.1 7.5 3.8 7.5-3.8M4.5 16.3l7.5 3.8 7.5-3.8"/>
+    </symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24">
+      <path d="M3.3 12h4.2l2.2-5.7 4.6 11.4 2.2-5.7h4.2"/>
+    </symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24">
+      <path d="M20 7.4v4.8h-4.8M4 16.6v-4.8h4.8"/>
+      <path d="M6.1 8.3A7.4 7.4 0 0 1 19.6 11M4.4 13A7.4 7.4 0 0 0 17.9 15.7"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24">
+      <path d="M3.2 7.7c0-1.1.9-2 2-2h4l2 2.3h7.6c1.1 0 2 .9 2 2v7.4c0 1.1-.9 2-2 2H5.2c-1.1 0-2-.9-2-2V7.7Z"/>
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24">
+      <rect x="8.2" y="8.2" width="11.6" height="12.2" rx="2.2"/>
+      <path d="M15.8 8.2V5.8c0-1-.8-1.8-1.8-1.8H5.8C4.8 4 4 4.8 4 5.8v9.4c0 1 .8 1.8 1.8 1.8h2.4"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24">
+      <path d="M4.2 6.7h15.6M9.2 3.8h5.6l.8 2.9H8.4l.8-2.9ZM6.4 6.7l.9 13.5h9.4l.9-13.5M10 10.3v6.3M14 10.3v6.3"/>
+    </symbol>
+    <symbol id="i-save" viewBox="0 0 24 24">
+      <path d="M4.2 5.5c0-1 .8-1.8 1.8-1.8h10.1l3.9 3.9v10.9c0 1-.8 1.8-1.8 1.8H6c-1 0-1.8-.8-1.8-1.8V5.5Z"/>
+      <path d="M7.5 3.7v5.2h8V3.7M7.8 20.3v-6.1h8.4v6.1"/>
+    </symbol>
+    <symbol id="i-external" viewBox="0 0 24 24">
+      <path d="M14 4.3h5.7V10M19.3 4.7l-8.2 8.2"/>
+      <path d="M18 13.8v4.8c0 1-.8 1.8-1.8 1.8H5.5c-1 0-1.8-.8-1.8-1.8V7.9c0-1 .8-1.8 1.8-1.8h4.8"/>
+    </symbol>
+    <symbol id="i-minimize" viewBox="0 0 24 24">
+      <path d="M5.2 12h13.6"/>
+    </symbol>
+    <symbol id="i-tray" viewBox="0 0 24 24">
+      <path d="M4.2 4.2h15.6v7H4.2zM3.2 20h17.6M8.2 13.7l3.8 3.8 3.8-3.8"/>
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24">
+      <path d="m6.2 6.2 11.6 11.6M17.8 6.2 6.2 17.8"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="m5 12.5 4.4 4.4L19 6.8"/>
+    </symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24">
+      <path d="M10.3 4.6 2.8 17.5c-.8 1.3.2 3 1.7 3h15c1.5 0 2.5-1.7 1.7-3L13.7 4.6c-.7-1.3-2.6-1.3-3.4 0Z"/>
+      <path d="M12 9v4.4M12 17.2h.01"/>
+    </symbol>
+    <symbol id="i-info" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 10.6v6M12 7.5h.01"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.7"/>
+      <path d="M12 6.8V12l3.3 2"/>
+    </symbol>
+    <symbol id="i-video" viewBox="0 0 24 24">
+      <rect x="2.8" y="5.2" width="18.4" height="13.6" rx="4"/>
+      <path d="m10.2 9.2 5.2 2.8-5.2 2.8V9.2Z" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24">
+      <path d="M20.8 11.1c0 4.4-3.9 7.6-8.8 7.6-1 0-2-.1-2.9-.4l-4.2 1.9 1.1-3.7c-1.5-1.4-2.4-3.3-2.4-5.4 0-4.4 3.9-7.6 8.8-7.6s8.4 3.2 8.4 7.6Z"/>
+      <path d="M8.3 10.7h.01M12 10.7h.01M15.7 10.7h.01"/>
+    </symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24">
+      <path d="M7.3 18.8h10.1a4.1 4.1 0 0 0 .6-8.2A6.2 6.2 0 0 0 6 9.6a4.7 4.7 0 0 0 1.3 9.2Z"/>
+    </symbol>
+    <symbol id="i-command" viewBox="0 0 24 24">
+      <path d="M8.2 4.2a3 3 0 1 1 3 3v9.6a3 3 0 1 1-3-3h7.6a3 3 0 1 1-3 3V7.2a3 3 0 1 1 3-3H8.2Z"/>
+    </symbol>
+    <symbol id="i-external-link" viewBox="0 0 24 24">
+      <path d="M13.2 4.5h6.3v6.3M19.5 4.5l-8.4 8.4"/>
+      <path d="M18.2 14.2v4.4c0 1-.8 1.8-1.8 1.8H5.3c-1 0-1.8-.8-1.8-1.8V7.5c0-1 .8-1.8 1.8-1.8h4.4"/>
+    </symbol>
+    <symbol id="i-file" viewBox="0 0 24 24">
+      <path d="M6.2 3.5h7.3l4.3 4.3v12.7H6.2V3.5Z"/>
+      <path d="M13.2 3.8v4.4h4.2M9 12h6M9 15.5h6"/>
+    </symbol>
+    <symbol id="i-scroll" viewBox="0 0 24 24">
+      <path d="M12 4.5v15M6.8 14.3 12 19.5l5.2-5.2"/>
+    </symbol>
+    <symbol id="i-shield-alert" viewBox="0 0 24 24">
+      <path d="M12 3.1 20 6v6.3c0 4-3.3 7.2-8 8.6-4.7-1.4-8-4.6-8-8.6V6l8-2.9Z"/>
+      <path d="M12 8.2v4.7M12 16.3h.01"/>
+    </symbol>
+    <symbol id="i-server" viewBox="0 0 24 24">
+      <rect x="3.2" y="3.6" width="17.6" height="6.4" rx="2"/>
+      <rect x="3.2" y="14" width="17.6" height="6.4" rx="2"/>
+      <path d="M7 6.8h.01M7 17.2h.01M11 6.8h6M11 17.2h6"/>
+    </symbol>
+  </svg>
+
+  <div class="app-shell" id="app">
+    <header class="titlebar">
+      <div class="titlebar-drag pywebview-drag-region">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="icon icon-18"><use href="#i-logo"></use></svg>
+        </span>
+        <span class="brand-name"><span class="brand-prefix">~/</span>zapret-ru</span>
+        <span class="brand-version" id="app-version">[v1.1.0]</span>
+      </div>
+      <div class="titlebar-actions">
+        <button class="window-btn" id="btn-minimize" type="button" title="Свернуть" aria-label="Свернуть окно">
+          <svg class="icon icon-14"><use href="#i-minimize"></use></svg>
+        </button>
+        <button class="window-btn window-btn-close" id="btn-window-close" type="button" title="Закрыть" aria-label="Закрыть окно">
+          <svg class="icon icon-14"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Разделы приложения">
+      <button class="tab active" id="tab-home" data-tab="home" type="button" role="tab" aria-selected="true" aria-controls="view-home">
+        <svg class="icon"><use href="#i-home"></use></svg><span>Главная</span>
+      </button>
+      <button class="tab" id="tab-lists" data-tab="lists" type="button" role="tab" aria-selected="false" aria-controls="view-lists" tabindex="-1">
+        <svg class="icon"><use href="#i-list"></use></svg><span>Списки</span>
+      </button>
+      <button class="tab" id="tab-logs" data-tab="logs" type="button" role="tab" aria-selected="false" aria-controls="view-logs" tabindex="-1">
+        <svg class="icon"><use href="#i-terminal"></use></svg><span>Логи</span>
+        <span class="tab-live" id="tab-log-live" hidden aria-hidden="true"></span>
+      </button>
+      <button class="tab" id="tab-settings" data-tab="settings" type="button" role="tab" aria-selected="false" aria-controls="view-settings" tabindex="-1">
+        <svg class="icon"><use href="#i-settings"></use></svg><span>Настройки</span>
+      </button>
+    </nav>
+
+    <main class="viewport" id="viewport">
+      <!-- Главная -->
+      <section class="view home-view active" id="view-home" role="tabpanel" aria-labelledby="tab-home">
+        <div class="banner banner-warning" id="engine-banner" role="status" hidden>
+          <div class="banner-main">
+            <span class="banner-icon"><svg class="icon"><use href="#i-alert"></use></svg></span>
+            <div class="banner-copy">
+              <strong id="banner-title">Проверьте файлы движка</strong>
+              <span id="banner-text">В папке bin не хватает компонентов zapret.</span>
+            </div>
+          </div>
+          <div class="banner-actions">
+            <button class="text-btn" id="banner-check" type="button">Проверить снова</button>
+            <button class="text-btn text-btn-accent" id="banner-open" type="button">Открыть bin</button>
+          </div>
+        </div>
+
+        <section class="hero" id="hero" aria-live="polite">
+          <div class="hero-glow" aria-hidden="true"></div>
+          <div class="hero-top">
+            <div class="hero-mark" id="hero-mark" aria-hidden="true">
+              <svg class="icon icon-23"><use href="#i-terminal"></use></svg>
+              <span class="hero-pulse"></span>
+            </div>
+            <div class="hero-copy">
+              <div class="eyebrow" id="status-eyebrow">ОБХОД ВЫКЛЮЧЕН</div>
+              <h1 id="status-title">Защита не запущена</h1>
+              <p id="status-sub">Выберите стратегию и нажмите «Запустить обход».</p>
+            </div>
+          </div>
+          <div class="hero-foot" id="hero-foot" hidden>
+            <span><svg class="icon icon-12"><use href="#i-clock"></use></svg><span id="uptime">00:00</span></span>
+            <span class="hero-foot-dot"></span>
+            <span>PID <b id="pid">—</b></span>
+            <span class="hero-foot-dot"></span>
+            <span id="active-mode">—</span>
+          </div>
+        </section>
+
+        <button class="btn btn-primary btn-start" id="btn-toggle" type="button" data-state="off">
+          <span class="btn-icon-wrap">
+            <svg class="icon btn-icon" id="toggle-icon"><use href="#i-play"></use></svg>
+            <span class="spinner spinner-light" aria-hidden="true"></span>
+          </span>
+          <span id="toggle-label">Запустить обход</span>
+        </button>
+
+        <div class="reapply-bar" id="reapply-bar" hidden>
+          <span>Настройки изменены</span>
+          <button class="text-btn text-btn-accent" id="btn-reapply" type="button">Применить</button>
+        </div>
+
+        <div class="card field-card">
+          <div class="field-head">
+            <label class="field-label" for="preset-select">Стратегия</label>
+            <span class="badge" id="preset-badge">Рекомендуется</span>
+          </div>
+          <div class="select-wrap">
+            <svg class="icon select-leading" aria-hidden="true"><use href="#i-layers"></use></svg>
+            <select id="preset-select" aria-describedby="preset-desc"></select>
+            <svg class="icon select-arrow" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+          </div>
+          <p class="field-desc" id="preset-desc">Fake + multisplit.</p>
+          <p class="field-caution" id="preset-caution" hidden></p>
+        </div>
+
+        <div class="card mode-card">
+          <div class="segmented" id="mode-seg" role="group" aria-label="Режим обхода">
+            <button class="seg-btn active" type="button" data-mode="list" aria-pressed="true">
+              <svg class="icon"><use href="#i-list"></use></svg><span>По списку</span>
+            </button>
+            <button class="seg-btn" type="button" data-mode="global" aria-pressed="false">
+              <svg class="icon"><use href="#i-globe"></use></svg><span>Всё</span>
+            </button>
+          </div>
+          <p class="mode-note" id="mode-note">Обход только для доменов из списка. Российские сервисы не затрагиваются.</p>
+          <div class="divider"></div>
+          <div class="toggle-row">
+            <span class="row-icon"><svg class="icon"><use href="#i-gamepad"></use></svg></span>
+            <div class="row-copy">
+              <div class="row-title">Game Filter <span class="mini-tag">TCP / UDP</span></div>
+              <p class="row-sub">Порты 1024–65535 для игр и голосовых чатов</p>
+            </div>
+            <label class="switch" title="Включить Game Filter">
+              <input type="checkbox" id="game-filter" role="switch" aria-label="Game Filter">
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card diag-card">
+          <div class="diag-head">
+            <div>
+              <h2>Проверка доступа</h2>
+              <p>HTTPS · таймаут 3 с</p>
+            </div>
+            <div class="diag-actions">
+              <button class="btn btn-secondary btn-small" id="btn-test" type="button">
+                <span class="spinner" aria-hidden="true"></span>
+                <svg class="icon button-leading"><use href="#i-activity"></use></svg>
+                <span id="btn-test-label">Тест</span>
+              </button>
+              <button class="btn btn-secondary btn-small" id="btn-autotune" type="button" title="Проверить все стратегии. Занимает около 30 секунд.">
+                <span class="spinner" aria-hidden="true"></span>
+                <svg class="icon button-leading"><use href="#i-refresh"></use></svg>
+                <span id="btn-autotune-label">Подбор</span>
+              </button>
+            </div>
+          </div>
+          <div class="service-grid" id="service-grid">
+            <div class="service-item" data-service="youtube">
+              <span class="service-name">
+                <svg class="icon service-icon"><use href="#i-video"></use></svg>
+                YouTube
+              </span>
+              <span class="service-meta">—</span>
+              <span class="service-status"><span class="status-dot"></span></span>
+            </div>
+            <div class="service-item" data-service="discord">
+              <span class="service-name">
+                <svg class="icon service-icon"><use href="#i-chat"></use></svg>
+                Discord
+              </span>
+              <span class="service-meta">—</span>
+              <span class="service-status"><span class="status-dot"></span></span>
+            </div>
+            <div class="service-item" data-service="cloudflare">
+              <span class="service-name">
+                <svg class="icon service-icon"><use href="#i-cloud"></use></svg>
+                Cloudflare
+              </span>
+              <span class="service-meta">—</span>
+              <span class="service-status"><span class="status-dot"></span></span>
+            </div>
+          </div>
+          <p class="diag-foot" id="diag-foot">Проверка выполняется напрямую, без системного прокси.</p>
+        </div>
+      </section>
+
+      <!-- Списки -->
+      <section class="view lists-view" id="view-lists" role="tabpanel" aria-labelledby="tab-lists">
+        <div class="view-head">
+          <div>
+            <h1>Списки</h1>
+            <p>Домены для обхода и исключений</p>
+          </div>
+          <button class="icon-btn" id="btn-open-lists-folder" type="button" title="Открыть папку списков" aria-label="Открыть папку списков">
+            <svg class="icon"><use href="#i-folder"></use></svg>
+          </button>
+        </div>
+
+        <div class="mini-tabs" role="tablist" aria-label="Файл списка">
+          <button class="mini-tab active" id="list-tab-general" data-list="general" type="button" role="tab" aria-selected="true">
+            Обход <span class="count-pill" id="count-general-pill">0</span>
+          </button>
+          <button class="mini-tab" id="list-tab-exclude" data-list="exclude" type="button" role="tab" aria-selected="false" tabindex="-1">
+            Исключения <span class="count-pill" id="count-exclude-pill">0</span>
+          </button>
+        </div>
+
+        <div class="editor-card">
+          <div class="editor-head">
+            <div class="editor-title-wrap">
+              <span class="editor-title" id="list-title">Список обхода</span>
+              <code class="editor-file" id="list-filename">list-general.txt</code>
+            </div>
+            <span class="save-state" id="list-save-state">Загрузка…</span>
+          </div>
+          <div class="editor-body">
+            <textarea id="list-editor" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" aria-label="Содержимое списка доменов"></textarea>
+          </div>
+          <div class="editor-foot">
+            <span class="editor-stats" id="list-stats">0 доменов</span>
+            <button class="btn btn-primary btn-small" id="btn-save-list" type="button" disabled>
+              <svg class="icon button-leading"><use href="#i-save"></use></svg>
+              <span>Сохранить</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="hint-row">
+          <svg class="icon"><use href="#i-info"></use></svg>
+          <span id="list-hint-text">По одному домену на строку. Строки с <code>#</code> — комментарии. Список перечитывается winws автоматически.</span>
+        </p>
+      </section>
+
+      <!-- Логи -->
+      <section class="view logs-view" id="view-logs" role="tabpanel" aria-labelledby="tab-logs">
+        <div class="view-head">
+          <div>
+            <h1>Логи</h1>
+            <p>Живой вывод winws.exe</p>
+          </div>
+          <div class="head-actions">
+            <button class="icon-btn" id="btn-copy-logs" type="button" title="Скопировать логи" aria-label="Скопировать логи">
+              <svg class="icon"><use href="#i-copy"></use></svg>
+            </button>
+            <button class="icon-btn" id="btn-clear-logs" type="button" title="Очистить логи" aria-label="Очистить логи">
+              <svg class="icon"><use href="#i-trash"></use></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="log-card card">
+          <div class="log-topbar">
+            <span class="log-state">
+              <span class="status-dot" id="log-dot"></span>
+              <span id="log-state-text">Ожидание запуска</span>
+            </span>
+            <span class="log-count" id="log-count">0 строк</span>
+          </div>
+          <div class="log-view" id="log-view" tabindex="0" role="log" aria-label="Журнал winws.exe">
+            <div class="empty-state" id="log-empty">
+              <svg class="icon icon-22"><use href="#i-terminal"></use></svg>
+              <span>Терминал пока пуст</span>
+              <small>Здесь появится вывод winws.exe после запуска.</small>
+            </div>
+            <div class="log-lines" id="log-lines"></div>
+          </div>
+          <button class="scroll-latest" id="btn-scroll-latest" type="button" hidden>
+            <svg class="icon icon-14"><use href="#i-scroll"></use></svg>
+            К последним
+          </button>
+        </div>
+
+        <details class="card command-card">
+          <summary>
+            <span class="summary-left">
+              <svg class="icon"><use href="#i-command"></use></svg>
+              <span>Команда запуска</span>
+            </span>
+            <svg class="icon summary-chevron"><use href="#i-chevron-down"></use></svg>
+          </summary>
+          <div class="command-body">
+            <pre id="command-line">Запустите обход, чтобы увидеть команду winws.exe.</pre>
+            <button class="btn btn-secondary btn-small" id="btn-copy-command" type="button">
+              <svg class="icon button-leading"><use href="#i-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
+          </div>
+        </details>
+      </section>
+
+      <!-- Настройки -->
+      <section class="view settings-view" id="view-settings" role="tabpanel" aria-labelledby="tab-settings">
+        <div class="view-head">
+          <div>
+            <h1>Настройки</h1>
+            <p>Система, движок и автозапуск</p>
+          </div>
+          <span class="version-chip" id="settings-version">v1.1.0</span>
+        </div>
+
+        <div class="card settings-card">
+          <div class="setting-row">
+            <span class="row-icon"><svg class="icon"><use href="#i-shield-check"></use></svg></span>
+            <div class="row-copy">
+              <div class="row-title" id="admin-title">Права администратора</div>
+              <p class="row-sub" id="admin-note">Проверка при запуске…</p>
+            </div>
+            <span class="status-pill" id="admin-pill">—</span>
+          </div>
+          <div class="divider"></div>
+          <div class="setting-row">
+            <span class="row-icon"><svg class="icon"><use href="#i-clock"></use></svg></span>
+            <div class="row-copy">
+              <div class="row-title">Запускать при входе в Windows</div>
+              <p class="row-sub">Задача планировщика с повышенными правами</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="autostart-toggle" role="switch" aria-label="Запускать при входе в Windows">
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="divider"></div>
+          <div class="setting-row">
+            <span class="row-icon"><svg class="icon"><use href="#i-tray"></use></svg></span>
+            <div class="row-copy">
+              <div class="row-title">Сворачивать в трей при закрытии</div>
+              <p class="row-sub">Крестик скрывает окно. Выход — через меню трея.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="tray-toggle" role="switch" aria-label="Сворачивать в трей при закрытии">
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card engine-card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Движок</span>
+              <span class="card-sub" id="engine-summary">Проверка файлов</span>
+            </div>
+            <button class="text-btn" id="btn-refresh-engine" type="button">
+              <svg class="icon icon-12"><use href="#i-refresh"></use></svg>
+              <span id="btn-refresh-engine-label">Проверить</span>
+            </button>
+          </div>
+          <div class="file-list" id="file-list"></div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-small" id="btn-open-bin" type="button">
+              <svg class="icon button-leading"><use href="#i-folder"></use></svg>
+              <span>Открыть bin</span>
+            </button>
+            <button class="text-btn" id="btn-reload-presets" type="button">Обновить presets</button>
+          </div>
+        </div>
+
+        <div class="card data-card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Данные</span>
+              <span class="card-sub">Ваши списки и настройки</span>
+            </div>
+          </div>
+          <div class="data-actions">
+            <button class="btn btn-secondary btn-small" id="btn-open-data" type="button">
+              <svg class="icon button-leading"><use href="#i-folder"></use></svg>
+              <span>Папка данных</span>
+            </button>
+            <button class="btn btn-secondary btn-small" id="btn-open-presets-file" type="button">
+              <svg class="icon button-leading"><use href="#i-file"></use></svg>
+              <span>presets.json</span>
+            </button>
+          </div>
+          <p class="path-note" id="data-path">—</p>
+        </div>
+
+        <div class="card usage-card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Статистика</span>
+              <span class="card-sub">Только на этом ПК · без телеметрии</span>
+            </div>
+            <span class="status-pill" id="usage-badge">LOCAL</span>
+          </div>
+          <div class="usage-grid">
+            <div class="usage-stat">
+              <span class="usage-key">запусков лаунчера</span>
+              <b class="usage-value" id="usage-launches">—</b>
+            </div>
+            <div class="usage-stat">
+              <span class="usage-key">сессий обхода</span>
+              <b class="usage-value" id="usage-bypass">—</b>
+            </div>
+            <div class="usage-stat">
+              <span class="usage-key">всего в обходе</span>
+              <b class="usage-value" id="usage-bypass-time">—</b>
+            </div>
+            <div class="usage-stat">
+              <span class="usage-key">в лаунчере</span>
+              <b class="usage-value" id="usage-session-time">—</b>
+            </div>
+          </div>
+          <p class="path-note" id="usage-since">Локальный счётчик. Данные не отправляются в сеть.</p>
+        </div>
+
+        <div class="card about-card">
+          <div class="about-brand">
+            <span class="brand-mark brand-mark-large" aria-hidden="true">
+              <svg class="icon icon-22"><use href="#i-logo"></use></svg>
+            </span>
+            <div>
+              <div class="row-title">Zapret RU <span class="version-chip about-version">v1.1.0</span></div>
+              <p class="row-sub">Локальный launcher для оригинального zapret</p>
+            </div>
+          </div>
+          <p class="about-text">Никакой телеметрии, скачивания кода или скрытых команд. WinDivert работает только после нажатия «Запустить обход».</p>
+          <div class="link-row">
+            <button class="text-btn" id="btn-link-zapret" type="button">Оригинальный zapret <svg class="icon icon-12"><use href="#i-external-link"></use></svg></button>
+            <button class="text-btn" id="btn-link-bundle" type="button">zapret-win-bundle <svg class="icon icon-12"><use href="#i-external-link"></use></svg></button>
+          </div>
+          <p class="about-fine">Zapret RU не связан с bol-van. Компоненты zapret распространяются отдельно.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="statusline" id="statusline" aria-label="Строка состояния">
+      <span class="statusline-item">
+        <span class="statusline-led" id="statusline-led"></span>
+        <span id="statusline-engine">engine:off</span>
+      </span>
+      <span class="statusline-sep">/</span>
+      <span id="statusline-mode">mode:list</span>
+      <span class="statusline-spacer"></span>
+      <span id="statusline-session">session:00:00</span>
+      <span class="statusline-sep">/</span>
+      <span id="statusline-admin">root:no</span>
+    </footer>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+    <div class="state-overlay" id="loading-overlay">
+      <div class="state-card">
+        <span class="splash-mark" aria-hidden="true">
+          <svg class="icon icon-32"><use href="#i-logo"></use></svg>
+          <span class="splash-ring"></span>
+        </span>
+        <h2>Zapret RU</h2>
+        <p>Подключение к локальному движку…</p>
+        <div class="loading-track" aria-hidden="true"><span></span></div>
+      </div>
+    </div>
+
+    <div class="state-overlay" id="fatal-overlay" hidden>
+      <div class="state-card fatal-card">
+        <span class="fatal-mark" aria-hidden="true"><svg class="icon icon-24"><use href="#i-shield-alert"></use></svg></span>
+        <h2>Не удалось загрузить приложение</h2>
+        <p id="fatal-message">Проверьте журнал launcher.log и повторите попытку.</p>
+        <button class="btn btn-secondary btn-small" id="btn-retry-bootstrap" type="button">
+          <svg class="icon button-leading"><use href="#i-refresh"></use></svg>
+          <span>Повторить</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

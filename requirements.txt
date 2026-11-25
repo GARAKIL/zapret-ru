@@ -1,0 +1,11 @@
+# Runtime
+pywebview==6.2.1
+pystray==0.19.5
+Pillow==12.3.0
+pythonnet==3.2.1
+clr_loader==0.3.1
+
+# Build tooling (used by build.bat; not required at runtime)
+nuitka==4.3.5
+zstandard==0.25.0
+ordered-set==4.1.0

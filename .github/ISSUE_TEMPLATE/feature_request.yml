@@ -1,0 +1,30 @@
+name: Feature request
+description: Предложить улучшение для Zapret RU
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Что предлагаете?
+      placeholder: Краткое описание идеи
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему это решает?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Как это должно работать?
+      description: Опишите интерфейс, поведение и ограничения.
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Принципы проекта
+      options:
+        - label: Предложение не добавляет рекламу, телеметрию или скрытые загрузки
+          required: true
