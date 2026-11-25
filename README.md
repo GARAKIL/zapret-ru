@@ -10,11 +10,21 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/GARAKIL/zapret-ru/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/GARAKIL/zapret-ru?style=flat-square&labelColor=0b0d0c&color=6de8b1"></a>
+  <a href="https://github.com/GARAKIL/zapret-ru/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GARAKIL/zapret-ru/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%2F11-6de8b1?style=flat-square&labelColor=0b0d0c">
   <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-6de8b1?style=flat-square&labelColor=0b0d0c">
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-6de8b1?style=flat-square&labelColor=0b0d0c">
   <img alt="No ads" src="https://img.shields.io/badge/ads-none-6de8b1?style=flat-square&labelColor=0b0d0c">
   <img alt="No telemetry" src="https://img.shields.io/badge/telemetry-none-6de8b1?style=flat-square&labelColor=0b0d0c">
+</p>
+
+<p align="center">
+  <a href="https://github.com/GARAKIL/zapret-ru/releases/latest"><b>Скачать ZapretRU.exe</b></a>
+  ·
+  <a href="https://github.com/GARAKIL/zapret-ru">Репозиторий</a>
+  ·
+  <a href="https://github.com/GARAKIL/zapret-ru/releases">Все релизы</a>
 </p>
 
 <p align="center">
@@ -477,7 +487,11 @@ CONTRIBUTING.md         правила разработки
 
 ## Репозиторий и релизы
 
-В проекте подготовлены:
+- Репозиторий: <https://github.com/GARAKIL/zapret-ru>
+- Релизы: <https://github.com/GARAKIL/zapret-ru/releases>
+- Текущий релиз: **v1.1.0** с `ZapretRU.exe` и `SHA256SUMS.txt`.
+
+В проекте настроены:
 
 - `.github/workflows/ci.yml` — тесты на каждый push/PR;
 - `.github/workflows/release.yml` — сборка onefile по тегу `v*` и публикация
