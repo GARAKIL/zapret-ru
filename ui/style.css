@@ -555,6 +555,39 @@ pre {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.view-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.view-mode button {
+  height: 25px;
+  padding: 0 10px;
+  color: var(--dim);
+  font-size: 9.5px;
+  font-weight: 500;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+
+.view-mode button:hover {
+  color: var(--text-soft);
+}
+
+.view-mode button.active {
+  color: var(--text);
+  background: linear-gradient(120deg, rgba(124, 92, 255, 0.32), rgba(56, 167, 255, 0.18));
 }
 
 .status-chip {
@@ -744,7 +777,7 @@ pre {
 .hero-metrics {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-top: 22px;
 }
@@ -841,6 +874,142 @@ pre {
 
 .engine-starting .eyebrow {
   color: var(--amber);
+}
+
+.simple-actions {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.simple-note {
+  display: none;
+  margin: 9px 0 0;
+  color: var(--dim);
+  font-size: 9px;
+  text-align: center;
+}
+
+.app-shell.simple-mode .home-grid {
+  grid-template-columns: minmax(0, 860px);
+  justify-content: center;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.app-shell.simple-mode .home-main {
+  align-items: center;
+}
+
+.app-shell.simple-mode .home-side,
+.app-shell.simple-mode .diag-card {
+  display: none;
+}
+
+.app-shell.simple-mode .hero {
+  width: 100%;
+  min-height: 0;
+  padding: 34px 38px 28px;
+  text-align: center;
+}
+
+.app-shell.simple-mode .hero-glow {
+  top: -220px;
+  right: 50%;
+  width: 560px;
+  height: 560px;
+  transform: translateX(50%);
+}
+
+.app-shell.simple-mode .hero-top,
+.app-shell.simple-mode .hero-foot {
+  justify-content: center;
+}
+
+.app-shell.simple-mode .hero-top {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app-shell.simple-mode .hero-copy {
+  text-align: center;
+}
+
+.app-shell.simple-mode .hero h1 {
+  font-size: 40px;
+}
+
+.app-shell.simple-mode .hero-sub {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 12.5px;
+}
+
+.app-shell.simple-mode .hero-metrics {
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.app-shell.simple-mode .btn-start {
+  width: 190px;
+  height: 190px;
+  flex-direction: column;
+  gap: 12px;
+  margin: 26px auto 0;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 14px;
+  box-shadow: 0 22px 60px rgba(83, 94, 255, 0.4);
+}
+
+.app-shell.simple-mode .btn-start .btn-icon-wrap {
+  width: 38px;
+  height: 38px;
+}
+
+.app-shell.simple-mode .btn-start .btn-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.app-shell.simple-mode .btn-start.is-running {
+  box-shadow: 0 22px 60px rgba(255, 69, 58, 0.16);
+}
+
+.app-shell.simple-mode .simple-actions {
+  display: flex;
+}
+
+.app-shell.simple-mode .simple-note {
+  display: block;
+}
+
+.app-shell.simple-mode .reapply-bar {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-height: 780px) {
+  .app-shell.simple-mode .hero {
+    padding-top: 24px;
+    padding-bottom: 22px;
+  }
+  .app-shell.simple-mode .hero h1 {
+    font-size: 34px;
+  }
+  .app-shell.simple-mode .btn-start {
+    width: 160px;
+    height: 160px;
+    margin-top: 18px;
+  }
+  .app-shell.simple-mode .hero-metrics {
+    margin-top: 16px;
+  }
 }
 
 /* ----------------------------------------------------------------- buttons */

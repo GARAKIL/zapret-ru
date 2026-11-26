@@ -17,7 +17,7 @@ from typing import Any
 
 SCHEMA_VERSION = 2
 _ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,48}$")
-_SPLIT_VALUES = ("sni",)
+_SPLIT_VALUES = ("sni", "sni-start", "sni-end")
 
 
 class PresetError(Exception):
@@ -65,8 +65,10 @@ def _validate_split(value: Any, preset_id: str) -> int | str:
             raise PresetError(f"{preset_id}.split должен быть в диапазоне 1–512")
         return value
     if isinstance(value, str) and value.strip().lower() in _SPLIT_VALUES:
-        return "sni"
-    raise PresetError(f"{preset_id}.split должен быть числом или «sni»")
+        return value.strip().lower()
+    raise PresetError(
+        f"{preset_id}.split должен быть числом, «sni», «sni-start» или «sni-end»"
+    )
 
 
 class PresetStore:

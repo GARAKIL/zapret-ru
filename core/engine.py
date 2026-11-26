@@ -194,14 +194,20 @@ def split_position(payload: bytes, host: HostInfo | None, strategy: int | str) -
     """Choose a byte offset that is strictly inside the payload."""
     if len(payload) < 2:
         return 0
-    tls_smart = host is not None and host.kind == "tls" and strategy in ("sni", "smart")
-    http_smart = (
-        host is not None
-        and host.kind == "http"
-        and strategy in ("sni", "host", "smart")
+    host_strategy = isinstance(strategy, str) and strategy in (
+        "sni",
+        "sni-start",
+        "sni-end",
+        "host",
+        "smart",
     )
-    if tls_smart or http_smart:
-        offset = host.start + max(1, host.length // 2)
+    if host is not None and host_strategy:
+        if strategy == "sni-start":
+            offset = host.start + 1
+        elif strategy == "sni-end":
+            offset = host.start + max(1, host.length - 1)
+        else:
+            offset = host.start + max(1, host.length // 2)
     elif isinstance(strategy, int):
         offset = strategy
     else:
@@ -412,9 +418,7 @@ class NativeEngine:
             )
         return f"Движок остановлен: {text or exc.__class__.__name__}"
 
-    def update_policy(
-        self, include: frozenset[str], exclude: frozenset[str]
-    ) -> None:
+    def update_policy(self, include: frozenset[str], exclude: frozenset[str]) -> None:
         with self._lock:
             if self._config is None:
                 return

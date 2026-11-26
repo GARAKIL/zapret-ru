@@ -5,11 +5,31 @@
     {
       "id": "smart",
       "name": "Умный",
-      "label": "SNI Split · QUIC → TCP",
+      "label": "SNI середина · QUIC → TCP",
       "badge": "Рекомендуется",
-      "description": "Разрезает TLS ClientHello внутри имени сайта и отключает QUIC, чтобы браузеры и приложения шли по TCP. Лучший старт для большинства сайтов и программ.",
+      "description": "Режет TLS ClientHello в середине имени сайта и переводит QUIC на TCP. Лучший старт для большинства сайтов и программ.",
       "caution": null,
       "split": "sni",
+      "block_quic": true
+    },
+    {
+      "id": "sni_start",
+      "name": "Старт SNI",
+      "label": "Разрез в начале имени",
+      "badge": "Новый",
+      "description": "Первый сегмент заканчивается сразу после начала домена. Помогает DPI, который читает только начало TLS-записи.",
+      "caution": null,
+      "split": "sni-start",
+      "block_quic": true
+    },
+    {
+      "id": "sni_end",
+      "name": "Конец SNI",
+      "label": "Разрез перед концом имени",
+      "badge": "Новый",
+      "description": "Домен почти целиком остаётся в первом сегменте, а последний символ уходит во второй. Для DPI с проверкой длины.",
+      "caution": null,
+      "split": "sni-end",
       "block_quic": true
     },
     {
@@ -45,9 +65,9 @@
     {
       "id": "tcp_only",
       "name": "Без QUIC-фильтра",
-      "label": "SNI Split · QUIC разрешён",
+      "label": "SNI · QUIC разрешён",
       "badge": "Для приложений",
-      "description": "Тот же SNI Split, но UDP 443 не блокируется. Выберите, если приложение принципиально использует QUIC и не умеет переходить на TCP.",
+      "description": "SNI Split в середине имени, но UDP 443 не блокируется. Выберите, если приложение принципиально использует QUIC.",
       "caution": "Если провайдер блокирует QUIC, сайты в этом режиме могут не открываться.",
       "split": "sni",
       "block_quic": false

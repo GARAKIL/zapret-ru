@@ -2,7 +2,9 @@
 (() => {
   "use strict";
   const presets = [
-    { id: "smart", name: "Умный", label: "SNI Split · QUIC → TCP", badge: "Рекомендуется", description: "Разрезает TLS ClientHello внутри имени сайта и отключает QUIC, чтобы браузеры и приложения шли по TCP.", caution: null, split: "sni", block_quic: true },
+    { id: "smart", name: "Умный", label: "SNI середина · QUIC → TCP", badge: "Рекомендуется", description: "Режет TLS ClientHello в середине имени сайта и отключает QUIC, чтобы браузеры и приложения шли по TCP.", caution: null, split: "sni", block_quic: true },
+    { id: "sni_start", name: "Старт SNI", label: "Разрез в начале имени", badge: "Новый", description: "Первый сегмент заканчивается сразу после начала домена.", caution: null, split: "sni-start", block_quic: true },
+    { id: "sni_end", name: "Конец SNI", label: "Разрез перед концом имени", badge: "Новый", description: "Домен почти целиком остаётся в первом сегменте, а последний символ уходит во второй.", caution: null, split: "sni-end", block_quic: true },
     { id: "split1", name: "Быстрый", label: "Split 1 · QUIC → TCP", badge: "Лёгкий", description: "Делит первый пакет на 1 байт. Минимальное вмешательство.", caution: null, split: 1, block_quic: true },
     { id: "split2", name: "Ровный", label: "Split 2 · QUIC → TCP", badge: "Баланс", description: "Делит первый пакет на 2 байта.", caution: null, split: 2, block_quic: true },
     { id: "split4", name: "Глубокий", label: "Split 4 · QUIC → TCP", badge: "Сложные сети", description: "Делит первый пакет на 4 байта. Для мобильного интернета.", caution: "Некоторые приложения с обязательным QUIC могут работать медленнее.", split: 4, block_quic: true },
@@ -110,7 +112,7 @@
     status.active_config = {
       preset_id: settings.preset_id,
       preset_name: "Умный",
-      preset_label: "SNI Split · QUIC → TCP",
+      preset_label: "SNI середина · QUIC → TCP",
       mode: settings.mode,
       game_filter: settings.game_filter,
       split: "sni",
@@ -137,7 +139,7 @@
   const api = {
     bootstrap: async () => ({
       ok: true,
-      app: { name: "Zapret RU", version: "1.2.0", task_name: "Zapret RU Launcher", task_command: "\"C:\\ZapretRU\\ZapretRU.exe\" --autostart", engine: "native" },
+      app: { name: "Zapret RU", version: "1.3.0", task_name: "Zapret RU Launcher", task_command: "\"C:\\ZapretRU\\ZapretRU.exe\" --autostart", engine: "native" },
       settings: { ...settings },
       presets,
       presets_updated: "2026-11-26",
@@ -226,11 +228,20 @@
     const tab = params.get("tab");
     const action = params.get("action");
     const scroll = params.get("scroll");
+    const ui = params.get("ui");
     let didTab = false;
     let didAction = false;
+    let didUi = false;
     const timer = window.setInterval(() => {
       const doc = frame.contentDocument;
       if (!doc || !doc.getElementById("loading-overlay")?.hidden) return;
+      if (ui && !didUi) {
+        const button = doc.querySelector(`#view-mode [data-ui-mode="${ui}"]`);
+        if (button) {
+          button.click();
+          didUi = true;
+        }
+      }
       if (tab && !didTab) {
         const button = doc.getElementById(`tab-${tab}`);
         if (button) {
@@ -249,7 +260,14 @@
           didAction = true;
         }
       }
-      if ((!tab || didTab) && (!action || didAction)) {
+      if (action === "check" && !didAction) {
+        const button = doc.getElementById("btn-simple-check");
+        if (button && !button.disabled) {
+          button.click();
+          didAction = true;
+        }
+      }
+      if ((!ui || didUi) && (!tab || didTab) && (!action || didAction)) {
         window.setTimeout(() => window.clearInterval(timer), 120);
       }
     }, 80);

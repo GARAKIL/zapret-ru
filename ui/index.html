@@ -9,8 +9,8 @@
        scripts, styles, images or network requests are loaded by this page. -->
   <link rel="icon" type="image/png" href="../assets/icon.png">
   <title>Zapret RU</title>
-  <link rel="stylesheet" href="style.css?v=3.0.1">
-  <script src="app.js?v=3.0.1" defer></script>
+  <link rel="stylesheet" href="style.css?v=3.1.0">
+  <script src="app.js?v=3.1.0" defer></script>
 </head>
 <body>
   <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -171,7 +171,7 @@
           <svg class="icon icon-18"><use href="#i-logo"></use></svg>
         </span>
         <span class="brand-name">Zapret RU</span>
-        <span class="brand-version" id="app-version">v1.2.0</span>
+        <span class="brand-version" id="app-version">v1.3.0</span>
         <span class="titlebar-badge">NATIVE ENGINE</span>
       </div>
       <div class="titlebar-actions">
@@ -221,7 +221,7 @@
             <span id="side-engine">Защита выключена</span>
           </div>
           <span class="sidebar-mode" id="side-mode">все программы</span>
-          <span class="sidebar-version">v1.2.0 · onefile</span>
+          <span class="sidebar-version">v1.3.0 · onefile</span>
         </div>
       </aside>
 
@@ -235,6 +235,10 @@
               <p>Один переключатель. Свой движок. Без winws и сторонних загрузок.</p>
             </div>
             <div class="page-head-actions">
+              <div class="view-mode" id="view-mode" role="group" aria-label="Режим интерфейса">
+                <button class="active" type="button" data-ui-mode="simple" aria-pressed="true">Простой</button>
+                <button type="button" data-ui-mode="advanced" aria-pressed="false">Расширенный</button>
+              </div>
               <span class="status-chip" id="engine-chip">движок готов</span>
             </div>
           </div>
@@ -270,6 +274,10 @@
                 <p class="hero-sub" id="status-sub">Нажмите одну кнопку — движок сам выберет рабочую стратегию.</p>
                 <div class="hero-metrics">
                   <div class="metric">
+                    <span>пинг</span>
+                    <b id="stat-ping">—</b>
+                  </div>
+                  <div class="metric">
                     <span>сессия</span>
                     <b id="uptime">00:00</b>
                   </div>
@@ -298,6 +306,11 @@
                   </span>
                   <span id="toggle-label">Включить защиту</span>
                 </button>
+                <div class="simple-actions" id="simple-actions">
+                  <button class="btn btn-secondary btn-small" id="btn-simple-check" type="button">Проверить сайты</button>
+                  <button class="btn btn-secondary btn-small" id="btn-simple-autotune" type="button">Подобрать стратегию</button>
+                </div>
+                <p class="simple-note" id="simple-note">Проверка ещё не запускалась.</p>
                 <div class="reapply-bar" id="reapply-bar" hidden>
                   <span>Настройки изменены</span>
                   <button class="text-btn text-btn-accent" id="btn-reapply" type="button">Применить</button>
@@ -522,7 +535,7 @@
               <h1>Настройки</h1>
               <p>Минимум переключателей. Всё остальное работает само.</p>
             </div>
-            <span class="version-chip" id="settings-version">v1.2.0</span>
+            <span class="version-chip" id="settings-version">v1.3.0</span>
           </div>
 
           <div class="settings-grid">
@@ -625,7 +638,7 @@
                   <svg class="icon icon-22"><use href="#i-logo"></use></svg>
                 </span>
                 <div>
-                  <div class="row-title">Zapret RU <span class="version-chip about-version">v1.2.0</span></div>
+                  <div class="row-title">Zapret RU <span class="version-chip about-version">v1.3.0</span></div>
                   <p class="row-sub">Свой движок · WinDivert · MIT</p>
                 </div>
               </div>

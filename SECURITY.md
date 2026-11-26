@@ -4,7 +4,7 @@
 
 | Version | Supported |
 |---|---|
-| 1.2.x | yes |
+| 1.3.x | yes |
 | < 1.2 | no |
 
 ## Report a vulnerability
@@ -22,8 +22,9 @@ every provider or every destination.
 
 The application has **no telemetry, no ads, no auto-downloads and no embedded
 remote code**. The only outbound requests made by the application itself are the
-explicit connectivity checks to YouTube, Discord and Cloudflare in the
-diagnostics card.
+explicit connectivity checks to YouTube, Discord and Cloudflare. They are
+triggered by the user: by starting protection (one automatic check) or by
+pressing the check button. There are no background probes.
 
 ## Threat model
 

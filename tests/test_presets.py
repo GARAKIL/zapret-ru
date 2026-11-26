@@ -15,17 +15,27 @@ class PresetStoreTests(unittest.TestCase):
     def setUpClass(cls):
         cls.store = PresetStore(PROJECT_ROOT / "presets.json")
 
-    def test_has_five_native_profiles(self):
+    def test_has_native_profiles(self):
         presets = self.store.public_presets()
         self.assertEqual(
             [preset["id"] for preset in presets],
-            ["smart", "split1", "split2", "split4", "tcp_only"],
+            [
+                "smart",
+                "sni_start",
+                "sni_end",
+                "split1",
+                "split2",
+                "split4",
+                "tcp_only",
+            ],
         )
         self.assertEqual(self.store.default_id, "smart")
         smart = self.store.get("smart")
         self.assertEqual(smart.split, "sni")
         self.assertTrue(smart.block_quic)
         self.assertFalse(self.store.get("tcp_only").block_quic)
+        self.assertEqual(self.store.get("sni_start").split, "sni-start")
+        self.assertEqual(self.store.get("sni_end").split, "sni-end")
         self.assertEqual(self.store.get("split4").split, 4)
 
     def test_profile_public_shape(self):

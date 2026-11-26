@@ -50,8 +50,8 @@ python -m nuitka ^
     --python-flag=no_docstrings,no_asserts ^
     --windows-icon-from-ico=assets\icon.ico ^
     --product-name="Zapret RU" ^
-    --file-version=1.2.0.0 ^
-    --product-version=1.2.0.0 ^
+    --file-version=1.3.0.0 ^
+    --product-version=1.3.0.0 ^
     --company-name="Zapret RU" ^
     --file-description="Zapret RU" ^
     --copyright="Built-in WinDivert engine. WinDivert/PyDivert are LGPL/GPL third-party components." ^

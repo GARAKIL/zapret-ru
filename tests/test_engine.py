@@ -58,6 +58,17 @@ class TlsParserTests(unittest.TestCase):
         self.assertEqual(split_position(payload, None, 10000), len(payload) - 1)
         self.assertEqual(split_position(payload, None, 1), 1)
 
+    def test_sni_start_and_end(self):
+        payload = make_client_hello("example.com")
+        info = parse_tls_client_hello(payload)
+        assert info is not None
+        start = split_position(payload, info, "sni-start")
+        end = split_position(payload, info, "sni-end")
+        self.assertEqual(start, info.start + 1)
+        self.assertEqual(end, info.start + info.length - 1)
+        self.assertGreater(start, 0)
+        self.assertLess(start, end)
+
 
 class HttpParserTests(unittest.TestCase):
     def test_host_header(self):

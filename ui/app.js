@@ -31,6 +31,8 @@
     autostart: false,
     blockQuicBusy: false,
     maximized: false,
+    uiMode: "simple",
+    lastPing: null,
     activeTab: "home",
     operation: null,
     autotuneStep: "",
@@ -150,6 +152,37 @@
     } catch {
       return String(number);
     }
+  }
+
+  function readUiMode() {
+    try {
+      return localStorage.getItem("zapretru.uiMode") === "advanced"
+        ? "advanced"
+        : "simple";
+    } catch {
+      return "simple";
+    }
+  }
+
+  function applyUiMode(mode) {
+    const next = mode === "advanced" ? "advanced" : "simple";
+    state.uiMode = next;
+    $("app")?.classList.toggle("simple-mode", next === "simple");
+    for (const button of $$("#view-mode button")) {
+      const active = button.dataset.uiMode === next;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+    try {
+      localStorage.setItem("zapretru.uiMode", next);
+    } catch {
+      // Storage is optional.
+    }
+  }
+
+  function setUiMode(mode) {
+    applyUiMode(mode);
+    renderStatus();
   }
 
   function plural(count, one, few, many) {
@@ -339,9 +372,11 @@
     state.previewError = null;
     state.operation = null;
     state.autotuneStep = "";
+    state.lastPing = null;
     state.ready = true;
     state.previousRunning = Boolean(state.status?.running);
 
+    applyUiMode(readUiMode());
     renderVersion();
     renderUsage();
     renderStatusline();
@@ -510,6 +545,10 @@
     const showFoot = running && !operation;
     setHidden(foot, !showFoot);
     const stats = status.stats || {};
+    setText(
+      "stat-ping",
+      state.lastPing != null ? `${formatNumber(state.lastPing)} мс` : "—"
+    );
     setText("stat-packets", running ? formatNumber(stats.packets) : "—");
     setText("stat-split", running ? formatNumber(stats.split_packets) : "—");
     setText(
@@ -573,6 +612,18 @@
     }
     const testButton = $("btn-test");
     if (testButton) testButton.disabled = state.testing || operation === "autotune";
+    const simpleCheck = $("btn-simple-check");
+    if (simpleCheck) {
+      simpleCheck.disabled = state.testing || operation === "autotune";
+      simpleCheck.textContent = state.testing ? "Проверяем…" : "Проверить сайты";
+    }
+    const simpleAutotune = $("btn-simple-autotune");
+    if (simpleAutotune) {
+      simpleAutotune.disabled = Boolean(operation) || state.testing;
+      simpleAutotune.textContent =
+        operation === "autotune" ? "Подбираем…" : "Подобрать стратегию";
+      simpleAutotune.classList.toggle("is-loading", operation === "autotune");
+    }
     const lockConfig = operation === "autotune";
     const presetSelect = $("preset-select");
     if (presetSelect) presetSelect.disabled = lockConfig || !hasPresets;
@@ -800,6 +851,7 @@
       return;
     }
     const wasRunning = isRunning();
+    let startedNow = false;
     state.operation = wasRunning ? "stop" : "start";
     renderStatus();
     renderReapplyState();
@@ -825,6 +877,7 @@
       } else if (wasRunning) {
         showToast("Фильтры WinDivert сняты, трафик идёт напрямую.", "success", "Защита выключена");
       } else {
+        startedNow = true;
         const preset = selectedPreset();
         showToast(
           `${preset ? `${preset.name} · ${preset.label}` : state.settings.preset_id}. Движок работает.`,
@@ -841,6 +894,13 @@
       renderStatus();
       renderEnvironment();
       renderReapplyState();
+      if (startedNow && isRunning()) {
+        window.setTimeout(() => {
+          if (isRunning() && !state.testing && !state.operation) {
+            void runConnectivityCheck();
+          }
+        }, 700);
+      }
       if (state.activeTab === "logs") {
         void fetchLogs();
       }
@@ -972,7 +1032,7 @@
   }
 
   function renderVersion() {
-    const version = state.data?.app?.version || "1.2.0";
+    const version = state.data?.app?.version || "1.3.0";
     setText("app-version", `v${version}`);
     setText("settings-version", `v${version}`);
     for (const element of $$(".about-version")) element.textContent = `v${version}`;
@@ -1276,6 +1336,7 @@
   function renderCheckNeutral() {
     for (const id of SERVICE_IDS) setServiceState(id, null, "—", "");
     setText("diag-foot", "Проверка выполняется напрямую, без системного прокси.");
+    setText("simple-note", "Проверка ещё не запускалась.");
     $("diag-foot")?.classList.remove("is-warning", "is-success");
     setText("btn-test-label", "Тест");
     setText("btn-autotune-label", "Подбор");
@@ -1304,6 +1365,11 @@
     const averageLatency = latencies.length
       ? Math.round(latencies.reduce((sum, value) => sum + value, 0) / latencies.length)
       : null;
+    const bestLatency = latencies.length ? Math.min(...latencies) : null;
+    if (bestLatency != null) {
+      state.lastPing = bestLatency;
+      setText("stat-ping", `${formatNumber(bestLatency)} мс`);
+    }
 
     const foot = $("diag-foot");
     if (foot) {
@@ -1326,6 +1392,17 @@
         }
       }
     }
+    const simpleNote = $("simple-note");
+    if (simpleNote) {
+      if (reachable === total && total > 0) {
+        const latency = bestLatency != null ? ` · ${formatNumber(bestLatency)} мс` : "";
+        simpleNote.textContent = `Все сервисы доступны${latency}`;
+      } else if (reachable > 0) {
+        simpleNote.textContent = `Доступно ${reachable} из ${total}. Попробуйте подобрать стратегию.`;
+      } else {
+        simpleNote.textContent = "Сервисы недоступны. Проверьте соединение и профиль.";
+      }
+    }
     return { total, reachable, averageLatency };
   }
 
@@ -1340,6 +1417,7 @@
     setText("btn-test-label", "Тест…");
     for (const id of SERVICE_IDS) setServiceState(id, "busy", "…", "");
     setText("diag-foot", "Проверяем HTTPS-ответы, таймаут 3 с…");
+    setText("simple-note", "Проверяем YouTube, Discord и Cloudflare…");
     $("diag-foot")?.classList.remove("is-warning", "is-success");
     renderStatus();
 
@@ -2011,6 +2089,10 @@
       );
     });
 
+    for (const button of $$("#view-mode button")) {
+      button.addEventListener("click", () => setUiMode(button.dataset.uiMode));
+    }
+
     const tablist = document.querySelector(".tabs");
     tablist?.addEventListener("keydown", handleTabKeys);
     for (const tab of $$(".tab")) {
@@ -2027,6 +2109,8 @@
     $("btn-reapply")?.addEventListener("click", () => void reapplySettings());
     $("btn-test")?.addEventListener("click", () => void runConnectivityCheck());
     $("btn-autotune")?.addEventListener("click", () => void runAutotune());
+    $("btn-simple-check")?.addEventListener("click", () => void runConnectivityCheck());
+    $("btn-simple-autotune")?.addEventListener("click", () => void runAutotune());
 
     $("banner-check")?.addEventListener("click", () => void handleBannerAction("primary"));
     $("banner-open")?.addEventListener("click", () => void handleBannerAction("secondary"));
@@ -2156,6 +2240,7 @@
     if (firstRun) {
       state.wired = true;
       wireEvents();
+      applyUiMode(readUiMode());
     }
     if (document.readyState === "loading") {
       if (firstRun) document.addEventListener("DOMContentLoaded", boot, { once: true });

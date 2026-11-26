@@ -1,8 +1,9 @@
 # Screenshots
 
 These images are generated from `tests/ui_preview.html` at 1120×800 with the
-mock API. The counters in the settings screenshot are demo values, not real
-telemetry or global user statistics. Zapret RU has no global counter and never
+mock API. `home.png` shows the default simple mode; `home-advanced.png` shows
+profiles and diagnostics. The counters in the settings screenshot are demo
+values, not real telemetry or global user statistics. Zapret RU has no global counter and never
 sends usage data anywhere.
 
 To regenerate them locally:

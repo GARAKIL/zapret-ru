@@ -45,7 +45,7 @@ class ApplicationCoreTests(unittest.TestCase):
         with patch("core.application.autostart.is_enabled", return_value=False):
             result = self.core.bootstrap()
         self.assertTrue(result["ok"])
-        self.assertEqual(len(result["presets"]), 5)
+        self.assertEqual(len(result["presets"]), 7)
         self.assertEqual(result["app"]["engine"], "native")
         self.assertTrue(result["environment"]["ready"])
         self.assertEqual(result["environment"]["engine"], "native")
@@ -156,7 +156,7 @@ class ApplicationCoreTests(unittest.TestCase):
             self.core.bootstrap()
         result = self.core.reload_presets()
         self.assertTrue(result["ok"])
-        self.assertEqual(len(result["presets"]), 5)
+        self.assertEqual(len(result["presets"]), 7)
 
     def test_legacy_presets_are_migrated(self):
         legacy = {
