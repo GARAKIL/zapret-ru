@@ -1032,7 +1032,7 @@
   }
 
   function renderVersion() {
-    const version = state.data?.app?.version || "1.3.0";
+    const version = state.data?.app?.version || "2.0.0";
     setText("app-version", `v${version}`);
     setText("settings-version", `v${version}`);
     for (const element of $$(".about-version")) element.textContent = `v${version}`;

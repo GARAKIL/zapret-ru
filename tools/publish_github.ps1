@@ -33,11 +33,11 @@ git add .
 if (git diff --cached --quiet) {
     Write-Host "[OK] Нет изменений для коммита."
 } else {
-    git commit -m "release: Zapret RU 1.3.0"
+    git commit -m "release: Zapret RU 2.0.0"
 }
 
-if (-not (git tag --list "v1.3.0")) {
-    git tag -a "v1.3.0" -m "Zapret RU 1.3.0"
+if (-not (git tag --list "v2.0.0")) {
+    git tag -a "v2.0.0" -m "Zapret RU 2.0.0"
 }
 
 $hasOrigin = (git remote 2>$null) -contains "origin"
@@ -65,5 +65,5 @@ Write-Host ""
 Write-Host "Репозиторий: https://github.com/$fullName"
 Write-Host "Тема: DPI bypass Windows"
 Write-Host "Теги: $($topics -join ', ')"
-Write-Host "Release workflow запустится после пуша тега v1.3.0."
+Write-Host "Release workflow запустится после пуша тега v2.0.0."
 Write-Host "Загрузите docs/social-preview.png в Settings -> Social preview."

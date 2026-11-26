@@ -42,8 +42,8 @@
     a:hover { color: #fff; }
     .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
     header { padding: 26px 0; display: flex; align-items: center; gap: 14px; }
-    .logo { width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(124,92,255,.4); display: grid; place-items: center; background: linear-gradient(150deg, rgba(124,92,255,.3), rgba(56,167,255,.1)); }
-    .logo svg { width: 25px; height: 25px; }
+    .logo { width: 42px; height: 42px; display: grid; place-items: center; background: transparent; filter: drop-shadow(0 0 12px rgba(124,92,255,.4)); }
+    .logo svg { width: 37px; height: 37px; }
     .brand { font-weight: 700; letter-spacing: -0.02em; }
     .brand small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
     header nav { margin-left: auto; display: flex; gap: 18px; color: var(--muted); font-size: 13px; }
@@ -88,7 +88,7 @@
   <div class="wrap">
     <header>
       <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="#0B0D13" stroke="rgba(255,255,255,.1)"/><path d="M10.6 12.2 16.2 16l-5.6 3.8" fill="none" stroke="#6CE8B1" stroke-width="2"/><path d="M19.1 19.8h5.1" fill="none" stroke="#EAF2EE" stroke-width="2"/></svg>
+        <svg viewBox="0 0 32 32"><defs><linearGradient id="homeLogo" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#C5B8FF"/><stop offset=".5" stop-color="#7C5CFF"/><stop offset="1" stop-color="#38A7FF"/></linearGradient></defs><path d="M6.8 8.3 17.2 16 6.8 23.7" fill="none" stroke="url(#homeLogo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 23.7h6.2" fill="none" stroke="#F6F8FF" stroke-width="3.4" stroke-linecap="round"/></svg>
       </span>
       <div class="brand">Zapret RU<small>свой DPI-движок</small></div>
       <nav>
@@ -152,7 +152,7 @@
         <h2>Частые вопросы</h2>
         <div class="faq">
           <details><summary>Это VPN или прокси?</summary><p>Нет. Трафик не идёт через чужие серверы. Движок меняет сегментацию TCP на вашем ПК, поэтому пинг не растёт из-за плеча маршрутизации.</p></details>
-          <details><summary>Нужен ли zapret или winws.exe?</summary><p>Нет. Zapret RU 1.3.0 содержит собственный движок и встроенный WinDivert. Папка bin не нужна.</p></details>
+          <details><summary>Нужен ли zapret или winws.exe?</summary><p>Нет. Zapret RU 2.0.0 содержит собственный движок и встроенный WinDivert. Папка bin не нужна.</p></details>
           <details><summary>Почему SmartScreen предупреждает?</summary><p>Сборка не подписана сертификатом Authenticode, а драйвер перехвата пакетов часто вызывает вопросы антивирусов. Проверяйте SHA-256 из релиза.</p></details>
           <details><summary>Работает ли голос Discord и игры?</summary><p>Движок оптимизирован для TCP-сайтов и приложений. UDP 443 блокируется для перехода на TCP; голосовые UDP-порты остаются без изменений и могут требовать отдельных мер.</p></details>
           <details><summary>Собирается ли проект локально?</summary><p>Да. Нужны Python 3.11+, Node для проверки JS и Nuitka. Команда: <code>build.bat</code>. Инструкция — в README.</p></details>

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 APP_NAME = "Zapret RU"
-APP_VERSION = "1.3.0"
+APP_VERSION = "2.0.0"
 APP_ID = "ZapretRU"
 APP_ENGINE = "native"
 APP_MUTEX = r"Global\ZapretRU.Launcher.v1"

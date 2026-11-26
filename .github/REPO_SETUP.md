@@ -4,7 +4,7 @@ This file is a checklist for publishing the project. It is written in Russian
 for the maintainer and is not used by the application.
 
 **Status:** published at <https://github.com/GARAKIL/zapret-ru> with release
-`v1.3.0`, topics, description and GitHub Pages landing page
+`v2.0.0`, topics, description and GitHub Pages landing page
 <https://garakil.github.io/zapret-ru/>. Only the social preview upload remains
 manual.
 

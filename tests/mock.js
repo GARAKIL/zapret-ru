@@ -139,7 +139,7 @@
   const api = {
     bootstrap: async () => ({
       ok: true,
-      app: { name: "Zapret RU", version: "1.3.0", task_name: "Zapret RU Launcher", task_command: "\"C:\\ZapretRU\\ZapretRU.exe\" --autostart", engine: "native" },
+      app: { name: "Zapret RU", version: "2.0.0", task_name: "Zapret RU Launcher", task_command: "\"C:\\ZapretRU\\ZapretRU.exe\" --autostart", engine: "native" },
       settings: { ...settings },
       presets,
       presets_updated: "2026-11-26",
